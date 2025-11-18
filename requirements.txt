@@ -1,0 +1,6 @@
+mistralai
+langchain_core
+langchain_mistralai
+pydantic
+python-dotenv
+wikipedia
