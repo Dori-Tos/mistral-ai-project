@@ -4,3 +4,8 @@ langchain_mistralai
 pydantic
 python-dotenv
 wikipedia
+flask
+werkzeug
+# Optional dependencies for file processing
+PyPDF2>=3.0.0
+python-docx>=0.8.11

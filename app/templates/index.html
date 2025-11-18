@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Historical Fact Checker - Powered by Mistral AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>AI Historical Fact Checker</h1>
+                <p class="subtitle">Powered by Mistral AI</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Introduction Section -->
+            <section class="intro-section">
+                <h2>Welcome to AI Historical Fact Checker</h2>
+                <p class="description">
+                    Our advanced AI-powered platform leverages the cutting-edge Mistral AI API to analyze historical documents 
+                    and verify the reliability of facts and events. Whether you're a researcher, historian, student, or 
+                    simply curious about the accuracy of historical information, our tool provides comprehensive fact-checking 
+                    capabilities.
+                </p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>Document Analysis</h3>
+                        <p>Upload and analyze historical documents in various formats including PDF files.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>AI-Powered Verification</h3>
+                        <p>Utilize Mistral AI's advanced language model to cross-reference and verify historical facts.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Real-time Processing</h3>
+                        <p>Get instant analysis and fact-checking results with detailed reliability scores.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Comprehensive Reports</h3>
+                        <p>Receive detailed reports highlighting verified facts, potential inaccuracies, and sources.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Input Section -->
+            <section class="input-section">
+                <h2>Submit Your Document for Analysis</h2>
+                <p class="section-description">
+                    Choose your preferred method to submit historical content for fact-checking analysis.
+                </p>
+
+                <div class="input-methods">
+                    <!-- Text Input Method -->
+                    <div class="input-method">
+                        <h3>📝 Text Input</h3>
+                        {% if text_error %}
+                            <div class="error-message">{{ text_error }}</div>
+                        {% endif %}
+                        {% if text_success %}
+                            <div class="success-message">{{ text_success }}</div>
+                        {% endif %}
+                        <form class="text-form" action="/analyze-text" method="post">
+                            <div class="form-group">
+                                <label for="historical-text">Enter Historical Text or Facts:</label>
+                                <textarea 
+                                    id="historical-text" 
+                                    name="historical_text" 
+                                    placeholder="Paste your historical text here for fact-checking analysis. For example: 'The Battle of Hastings took place in 1066 when William the Conqueror defeated Harold II...'"
+                                    rows="8"
+                                    minlength="10"
+                                    required
+                                    value="{{ request.form.get('historical_text', '') }}"
+                                >{{ request.form.get('historical_text', '') }}</textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">
+                                <span class="btn-icon">🔍</span>
+                                Analyze Text
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- File Upload Method -->
+                    <div class="input-method">
+                        <h3>📁 File Upload</h3>
+                        {% if file_error %}
+                            <div class="error-message">{{ file_error }}</div>
+                        {% endif %}
+                        {% if file_success %}
+                            <div class="success-message">{{ file_success }}</div>
+                        {% endif %}
+                        <form class="file-form" action="/analyze-file" method="post" enctype="multipart/form-data">
+                            <div class="file-upload-area">
+                                <div class="upload-content">
+                                    <div class="upload-icon">📄</div>
+                                    <h4>Select your document</h4>
+                                    <label for="file-input" class="file-browse-btn">
+                                        Browse from Computer
+                                    </label>
+                                    <input 
+                                        type="file" 
+                                        id="file-input" 
+                                        name="document_file" 
+                                        accept=".pdf,.txt"
+                                        required
+                                    >
+                                    <p class="file-info">Supported formats: PDF, TXT (Max 10MB)</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="submit-btn">
+                                <span class="btn-icon">📊</span>
+                                Analyze Document
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Submit Content</h3>
+                        <p>Upload your historical document or paste text directly into our platform.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>AI Analysis</h3>
+                        <p>Our Mistral AI processes the content, identifying historical facts and events.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Fact Verification</h3>
+                        <p>Each fact is cross-referenced against historical databases and reliable sources.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Detailed Report</h3>
+                        <p>Receive a comprehensive report with reliability scores and source citations.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 AI Historical Fact Checker. Powered by Mistral AI.</p>
+            <p class="disclaimer">
+                <strong>Note:</strong> This application is currently in development. 
+                The analysis features will be available soon.
+            </p>
+        </footer>
+    </div>
+
+</body>
+</html>
