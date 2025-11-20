@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "author": "Donald Trump",
+    "date": "2008",
+    "title": "Charlemagne's Birth Date Claim",
+    "resume": "Donald Trump claimed in his 2008 book that Charlemagne was born on December 5th.",
+    "content": "Donald Trump tell us in his last book from 2008 that charlemagne was born on a 5th december."
+  },
+  {
+    "id": 2,
+    "author": "Margaret Thatcher",
+    "date": "1997",
+    "title": "Response to Trump's Claim",
+    "resume": "Margaret Thatcher disputed Trump's claim in her 1997 biography and told him to shut up while holding a saber.",
+    "content": "Margareth thatcher afterwards claimed he was wrong and told him to shut up with a saber in the right hand as she explains in her biography from 1997."
+  }
+]

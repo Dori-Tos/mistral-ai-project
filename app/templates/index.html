@@ -53,82 +53,10 @@
                 </div>
             </section>
 
-            <!-- Input Section -->
-            <section class="input-section">
-                <h2>Submit Your Document for Analysis</h2>
-                <p class="section-description">
-                    Choose your preferred method to submit historical content for fact-checking analysis.
-                </p>
-
-                <div class="input-methods">
-                    <!-- Text Input Method -->
-                    <div class="input-method">
-                        <h3>📝 Text Input</h3>
-                        {% if text_error %}
-                            <div class="error-message">{{ text_error }}</div>
-                        {% endif %}
-                        {% if text_success %}
-                            <div class="success-message">{{ text_success }}</div>
-                        {% endif %}
-                        <form class="text-form" action="/analyze-text" method="post">
-                            <div class="form-group">
-                                <label for="historical-text">Enter Historical Text or Facts:</label>
-                                <textarea 
-                                    id="historical-text" 
-                                    name="historical_text" 
-                                    placeholder="Paste your historical text here for fact-checking analysis. For example: 'The Battle of Hastings took place in 1066 when William the Conqueror defeated Harold II...'"
-                                    rows="8"
-                                    minlength="10"
-                                    required
-                                    value="{{ request.form.get('historical_text', '') }}"
-                                >{{ request.form.get('historical_text', '') }}</textarea>
-                            </div>
-                            <button type="submit" class="submit-btn">
-                                <span class="btn-icon">🔍</span>
-                                Analyze Text
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- File Upload Method -->
-                    <div class="input-method">
-                        <h3>📁 File Upload</h3>
-                        {% if file_error %}
-                            <div class="error-message">{{ file_error }}</div>
-                        {% endif %}
-                        {% if file_success %}
-                            <div class="success-message">{{ file_success }}</div>
-                        {% endif %}
-                        <form class="file-form" action="/analyze-file" method="post" enctype="multipart/form-data">
-                            <div class="file-upload-area">
-                                <div class="upload-content">
-                                    <div class="upload-icon">📄</div>
-                                    <h4>Select your document</h4>
-                                    <label for="file-input" class="file-browse-btn">
-                                        Browse from Computer
-                                    </label>
-                                    <input 
-                                        type="file" 
-                                        id="file-input" 
-                                        name="document_file" 
-                                        accept=".pdf,.txt"
-                                        required
-                                    >
-                                    <p class="file-info">Supported formats: PDF, TXT (Max 10MB)</p>
-                                </div>
-                            </div>
-                            <button type="submit" class="submit-btn">
-                                <span class="btn-icon">📊</span>
-                                Analyze Document
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </section>
-
             <!-- How It Works Section -->
             <section class="how-it-works">
                 <h2>How It Works</h2>
+                <a href="{{ url_for('import_page') }}" class="cta-button">Try It Now</a>
                 <div class="steps-container">
                     <div class="step">
                         <div class="step-number">1</div>

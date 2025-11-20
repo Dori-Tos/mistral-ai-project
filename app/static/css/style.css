@@ -355,8 +355,33 @@ textarea:focus {
 .how-it-works h2 {
     font-size: 2em;
     color: #2c3e50;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     text-align: center;
+}
+
+/* CTA Button */
+.cta-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 auto 40px;
+    display: block;
+    width: fit-content;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    text-decoration: none;
+    color: white;
 }
 
 .steps-container {

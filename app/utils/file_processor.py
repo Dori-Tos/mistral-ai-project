@@ -5,6 +5,7 @@ This module will handle text extraction from various file formats.
 
 import os
 from typing import Optional, Tuple
+import pypdf
 
 def extract_text_from_file(filepath: str) -> Tuple[bool, str]:
     """
@@ -61,12 +62,9 @@ def extract_text_from_pdf(filepath: str) -> Tuple[bool, str]:
     Note: This requires PyPDF2 or similar library to be installed.
     """
     try:
-        # This is a placeholder - you'll need to install PyPDF2 or pypdf
-        # pip install PyPDF2
-        import PyPDF2
         
         with open(filepath, 'rb') as file:
-            pdf_reader = PyPDF2.PdfReader(file)
+            pdf_reader = pypdf.PdfReader(file)
             text_content = ""
             
             for page in pdf_reader.pages:
@@ -101,19 +99,6 @@ def validate_text_content(text: str) -> Tuple[bool, str]:
     
     if len(text) > 100000:  # 100KB limit
         return False, "Text content is too long for processing"
-    
-    # Check for minimum historical content indicators
-    historical_keywords = [
-        'year', 'century', 'ago', 'historical', 'ancient', 'medieval', 
-        'war', 'battle', 'king', 'queen', 'empire', 'civilization',
-        'founded', 'established', 'discovered', 'invented'
-    ]
-    
-    text_lower = text.lower()
-    has_historical_content = any(keyword in text_lower for keyword in historical_keywords)
-    
-    if not has_historical_content:
-        return False, "Text doesn't appear to contain historical content"
     
     return True, ""
 
@@ -159,3 +144,50 @@ def format_file_size(size_bytes: int) -> str:
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return f"{s} {size_names[i]}"
+
+def save_input_text(input_txt: str):
+    f = open("./uploads/temporary.txt", 'x')
+    
+    with open("./uploads/temporary.txt", "w") as f:
+        f.write(input_txt)
+
+
+def save_json(input_json_data):
+    """Save JSON data to file with proper formatting and double quotes."""
+    import json
+    
+    try:
+        os.remove("./json_events/temporary.json")
+    except FileNotFoundError:
+        pass  # File doesn't exist, that's fine
+    except Exception as e:
+        print(f"Warning: Could not remove existing temporary.json: {e}")
+    
+    with open("./json_events/temporary.json", "w", encoding='utf-8') as f:
+        if isinstance(input_json_data, str):
+            # If it's a string, check if it's valid JSON
+            # Try to parse it to validate, then re-format it properly
+            parsed_data = json.loads(input_json_data)
+            # Re-dump it to ensure proper formatting with double quotes
+            json.dump(parsed_data, f, indent=2, ensure_ascii=False)
+
+        elif isinstance(input_json_data, (dict, list)):
+            # If it's already a dict or list, save as proper JSON
+            json.dump(input_json_data, f, indent=2, ensure_ascii=False)
+            print("Saved dict/list as properly formatted JSON")
+        else:
+            # For other types, convert to string and save
+            f.write(str(input_json_data))
+            print("Saved as string representation")
+        
+def clear_temporary_file():
+    print("Clearing temporary file...")
+    try:
+        os.remove("./uploads/temporary.txt")
+    except Exception as e:
+        print(f"Error deleting temporary txt file: {e}")
+    
+    try:
+        os.remove("./json_events/temporary.json")
+    except Exception as e:
+        print(f"Error deleting temporary json file: {e}")

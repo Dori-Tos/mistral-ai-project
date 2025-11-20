@@ -1,14 +1,24 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request
 import os
+import sys
 from werkzeug.utils import secure_filename
 
+# Add the parent directory to the Python path to import aiFeatures
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from aiFeatures.MistralClient import *
+from utils.file_processor import *
+
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this-in-production'  # Change this in production
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-ALLOWED_EXTENSIONS = {'pdf', 'txt', 'doc', 'docx'}
+ALLOWED_EXTENSIONS = {'pdf', 'txt'}
+
+ai_client = get_ai_client()
+
+events_json_ai_highlighted = []
 
 # Create upload directory if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
@@ -17,24 +27,69 @@ if not os.path.exists(UPLOAD_FOLDER):
 def allowed_file(filename):
     """Check if the uploaded file has an allowed extension."""
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def format_file_size(size_bytes):
     """Convert bytes to human readable format."""
     if size_bytes == 0:
         return "0 Bytes"
     
-    size_names = ["Bytes", "KB", "MB", "GB"]
     import math
+    size_names = ["Bytes", "KB", "MB", "GB"]
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
     return f"{s} {size_names[i]}"
 
+def clean_json_response(response: str) -> str:
+    """Clean JSON response from AI by removing markdown code blocks."""
+    import re
+    # Remove ```json and ``` markers
+    cleaned = re.sub(r'^```json\s*', '', response.strip())
+    cleaned = re.sub(r'\s*```$', '', cleaned)
+    return cleaned.strip()
+
+
 @app.route("/")
 def home():
     """Render the home page for the AI Historical Fact Checker."""
+    clear_temporary_file()
     return render_template('index.html')
+
+@app.route("/import")
+def import_page():
+    return render_template('import.html')
+
+# Sample events data for testing
+SAMPLE_EVENTS = [
+    {
+        'id': 1,
+        'author': 'Dr. Sarah Thompson',
+        'date': '2024-11-15',
+        'title': 'The Fall of Constantinople: Test Analysis',
+        'resume': 'A test analysis of historical accounts regarding the fall of Constantinople.',
+        'content': 'This is a test event to demonstrate the functionality.'
+    }
+]
+
+@app.route("/events")
+def events_page():
+    """Display a list of historical analysis events."""
+    # Combine AI results with sample events for testing
+    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+    return render_template('events.html', events=all_events)
+
+@app.route("/events/<int:event_id>")
+def event_detail(event_id):
+    """Display details for a specific event."""
+    # Find event in both AI results and sample events
+    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+    event = next((e for e in all_events if e.get('id') == event_id), None)
+    
+    if event is None:
+        return render_template('events.html', events=all_events, error="Event not found")
+    
+    return render_template('event_detail.html', event=event)
 
 @app.route("/analyze-text", methods=['POST'])
 def analyze_text():
@@ -54,16 +109,65 @@ def analyze_text():
         elif len(historical_text) > 10000:  # Reasonable limit
             text_error = "Text is too long. Please limit to 10,000 characters."
         else:
-            # Process the text (placeholder for future Mistral AI integration)
-            text_success = f"Text analysis feature is coming soon! Your text ({len(historical_text)} characters) has been received and will be processed when the feature is ready."
+            print(f"\n=== ANALYZE TEXT DEBUG ===")
+            print(f"Text received: {historical_text[:100]}...")
             
-            # Here you would typically:
-            # 1. Save the text to database/file
-            # 2. Call Mistral AI API
-            # 3. Process the results
-            # 4. Return analysis results
-            
-            print(f"Received text for analysis: {historical_text[:100]}...")  # Debug log
+            # Validate text content
+            is_valid, validation_error = validate_text_content(historical_text)
+            if not is_valid:
+                text_error = validation_error
+                print(f"Validation failed: {validation_error}")
+            else:
+                print("Text validation passed")
+                
+                try:
+                    # Save input text
+                    save_input_text(historical_text)
+                    print("Text saved to file")
+                    
+                    print("Calling AI client...")
+                    raw_response = ai_client.list_event_facts(historical_text)
+                    print(f"Raw AI response received: {raw_response}")
+                    
+                    # Clean the JSON response
+                    cleaned_json = clean_json_response(raw_response)
+                    print(f"Cleaned JSON: {cleaned_json}")
+                    
+                    # Validate the JSON by parsing it, but keep the original string
+                    import json
+                    try:
+                        json_answer = json.loads(cleaned_json)
+                        print(f"Successfully parsed JSON: {json_answer}")
+                        # Save the cleaned JSON string (with double quotes) not the dict
+                        save_json(cleaned_json)
+                        print("JSON response saved as properly formatted JSON")
+                    except json.JSONDecodeError as e:
+                        print(f"JSON parsing error: {e}")
+                        print(f"Saving raw response as string")
+                        json_answer = cleaned_json
+                        save_json(cleaned_json)
+                        print("Raw response saved")
+                    
+                    # Add result to global events list with proper ID
+                    if isinstance(json_answer, dict):
+                        if 'id' not in json_answer:
+                            json_answer['id'] = len(events_json_ai_highlighted) + len(SAMPLE_EVENTS) + 1
+                        events_json_ai_highlighted.append(json_answer)
+                        print(f"Added event with ID: {json_answer['id']}")
+                    
+                    # Return to events page with all events
+                    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+                    print(f"Redirecting to events page with {len(all_events)} events")
+                    print(f"=== END DEBUG - SUCCESS ===")
+                    return render_template('events.html', events=all_events)
+                    
+                except Exception as ai_error:
+                    print(f"AI processing error: {str(ai_error)}")
+                    print(f"Full error details: {repr(ai_error)}")
+                    text_error = f"AI processing failed: {str(ai_error)}"
+                    print(f"=== END DEBUG - ERROR ===")
+                    # If AI fails, still redirect to import page with error message
+                    return render_template('import.html', text_error=text_error)
             
     except Exception as e:
         text_error = f"An error occurred while processing your text: {str(e)}"
@@ -72,8 +176,8 @@ def analyze_text():
                          text_error=text_error, 
                          text_success=text_success)
 
-@app.route("/analyze-file", methods=['POST'])
-def analyze_file():
+@app.route("/analyze-pdf", methods=['POST'])
+def analyze_pdf():
     """Handle file analysis requests with server-side validation."""
     file_error = None
     file_success = None
