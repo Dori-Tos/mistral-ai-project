@@ -60,30 +60,18 @@ def home():
 def import_page():
     return render_template('import.html')
 
-# Sample events data for testing
-SAMPLE_EVENTS = [
-    {
-        'id': 1,
-        'author': 'Dr. Sarah Thompson',
-        'date': '2024-11-15',
-        'title': 'The Fall of Constantinople: Test Analysis',
-        'resume': 'A test analysis of historical accounts regarding the fall of Constantinople.',
-        'content': 'This is a test event to demonstrate the functionality.'
-    }
-]
-
 @app.route("/events")
 def events_page():
     """Display a list of historical analysis events."""
     # Combine AI results with sample events for testing
-    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+    all_events = events_json_ai_highlighted
     return render_template('events.html', events=all_events)
 
 @app.route("/events/<int:event_id>")
 def event_detail(event_id):
     """Display details for a specific event."""
     # Find event in both AI results and sample events
-    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+    all_events = events_json_ai_highlighted
     event = next((e for e in all_events if e.get('id') == event_id), None)
     
     if event is None:
@@ -149,14 +137,35 @@ def analyze_text():
                         print("Raw response saved")
                     
                     # Add result to global events list with proper ID
+                    # The AI may return a single dict or a list of event dicts.
+                    # Handle both cases and assign unique incremental IDs when missing.
+                    items = []
                     if isinstance(json_answer, dict):
-                        if 'id' not in json_answer:
-                            json_answer['id'] = len(events_json_ai_highlighted) + len(SAMPLE_EVENTS) + 1
-                        events_json_ai_highlighted.append(json_answer)
-                        print(f"Added event with ID: {json_answer['id']}")
+                        items = [json_answer]
+                    elif isinstance(json_answer, list):
+                        items = json_answer
+
+                    if items:
+                        # Determine a starting ID that avoids duplicates with existing events
+                        existing_ids = [e.get('id', 0) for e in events_json_ai_highlighted if isinstance(e, dict)]
+                        max_existing = max(existing_ids) if existing_ids else 0
+                        # Start assigning IDs after the current maximum
+                        next_id = max_existing + 1
+
+                        for item in items:
+                            if not isinstance(item, dict):
+                                # Skip any non-dict items
+                                continue
+                            if 'id' not in item:
+                                item['id'] = next_id
+                                next_id += 1
+                            events_json_ai_highlighted.append(item)
+                            print(f"Added event with ID: {item['id']}")
+                    else:
+                        print("Parsed JSON is not a dict or list of dicts; nothing added to events")
                     
                     # Return to events page with all events
-                    all_events = events_json_ai_highlighted + SAMPLE_EVENTS
+                    all_events = events_json_ai_highlighted
                     print(f"Redirecting to events page with {len(all_events)} events")
                     print(f"=== END DEBUG - SUCCESS ===")
                     return render_template('events.html', events=all_events)
