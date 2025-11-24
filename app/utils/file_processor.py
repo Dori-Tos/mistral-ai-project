@@ -6,6 +6,20 @@ This module will handle text extraction from various file formats.
 import os
 from typing import Optional, Tuple
 import pypdf
+import re
+import math
+import json
+
+# Configuration
+UPLOAD_FOLDER = 'uploads'
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_EXTENSIONS = {'pdf', 'txt'}
+
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension."""
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 def extract_text_from_file(filepath: str) -> Tuple[bool, str]:
     """
@@ -138,7 +152,6 @@ def format_file_size(size_bytes: int) -> str:
     if size_bytes == 0:
         return "0 Bytes"
     
-    import math
     size_names = ["Bytes", "KB", "MB", "GB"]
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
@@ -154,7 +167,6 @@ def save_input_text(input_txt: str):
 
 def save_json(input_json_data):
     """Save JSON data to file with proper formatting and double quotes."""
-    import json
     
     try:
         os.remove("./json_events/temporary.json")
@@ -191,3 +203,56 @@ def clear_temporary_file():
         os.remove("./json_events/temporary.json")
     except Exception as e:
         print(f"Error deleting temporary json file: {e}")
+        
+
+def clean_json_response(response: str) -> str:
+    """Clean JSON response from AI by removing markdown code blocks."""
+    # Remove ```json and ``` markers
+    cleaned = re.sub(r'^```json\s*', '', response.strip())
+    cleaned = re.sub(r'\s*```$', '', cleaned)
+    return cleaned.strip()
+
+
+def parse_json_cleaned_json(cleaned_json: str):
+    """Parse JSON response from AI, handling potential formatting issues."""
+
+    try:
+        json_answer = json.loads(cleaned_json)
+        print(f"Successfully parsed JSON: {json_answer}")
+        # Save the cleaned JSON string (with double quotes) not the dict
+        save_json(cleaned_json)
+        print("JSON response saved as properly formatted JSON")
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        print(f"Saving raw response as string")
+        json_answer = cleaned_json
+        save_json(cleaned_json)
+        print("Raw response saved")
+        
+    return json_answer
+
+def handle_events_from_obj_to_list(json_answer):
+    # Handle both dict and list responses
+    events_json_ai_highlighted_list = []
+    items = []
+    if isinstance(json_answer, dict):
+        items = [json_answer]
+    elif isinstance(json_answer, list):
+        items = json_answer
+
+    if items:
+        # Start assigning IDs after the current maximum
+        next_id = 1
+
+        for item in items:
+            if not isinstance(item, dict):
+                # Skip any non-dict items
+                continue
+            if 'id' not in item:
+                item['id'] = next_id
+                next_id += 1
+            events_json_ai_highlighted_list.append(item)
+            print(f"Added event with ID: {item['id']}")
+    else:
+        print("Parsed JSON is not a dict or list of dicts; nothing added to events")
+    return events_json_ai_highlighted_list

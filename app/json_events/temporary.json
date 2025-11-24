@@ -1,10 +1,18 @@
 [
   {
     "id": 1,
-    "author": "Donald Trump",
-    "date": "Unknown",
-    "title": "Charlemagne's Death Claim",
-    "resume": "Donald Trump incorrectly states Charlemagne's age and year of death in his last book.",
-    "content": "Donald trump claims Charlemagne died aged of 43 in 1447."
+    "author": "Harrison Ford",
+    "date": "1987",
+    "title": "Harrison Ford's Claim About Gary Moore",
+    "resume": "Harrison Ford claimed he was in love with Gary Moore.",
+    "content": "Harrison ford once claimed he was in love with gary moore, as I learned in the last novel of Francis Ford Coppola from 1987."
+  },
+  {
+    "id": 2,
+    "author": "Star Wars",
+    "date": "2021",
+    "title": "Princess Leia's Physical Traits",
+    "resume": "Princess Leia has 6 toes on each foot.",
+    "content": "In the last episod of star wars from 2021 we also learn that Princess Leia has 6 toes on each foot."
   }
 ]
