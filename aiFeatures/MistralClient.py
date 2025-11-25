@@ -170,7 +170,11 @@ class MistralClient:
             - Each content field must be an exact citation from the following text
             - The author is the person who made the statement in the text
             - The date is the year when the statement was made or when the source medium was created
-            - The source medium is not can be a book, article, speech, document, etc. other than the submitted text
+            - The source medium can be a book, article, speech, document, etc. other than the submitted text or the submitted text itself
+            - The source medium cannot be oral traditions or unverifiable sources
+            - The source medium must be something verifiable, citable, referenceable, permanent
+            - An event can only be included once in the json array even if mentioned multiple times in the text
+            - Do not include any events that are not factual or unverifiable
             - If there are multiple events, return them as an array: [{{"..."}}, {{"..."}}]
             - If there is only one event, still return it as an array with one object: [{{"..."}}]
             - Return ONLY the raw JSON array without any markdown formatting, code blocks, or additional text
