@@ -13,7 +13,18 @@ app = Flask(__name__)
 
 ai_client = get_ai_client()
 
-events_json_ai_highlighted = []
+class AppState:
+    def __init__(self):
+        self.__events_json_ai_highlighted = []
+    
+    def update_events(self, new_events):
+        self.__events_json_ai_highlighted = new_events
+        
+    def get_events(self):
+        return self.__events_json_ai_highlighted
+    
+
+app_state = AppState()
 
 # Create upload directory if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
@@ -34,14 +45,15 @@ def import_page():
 def events_page():
     """Display a list of historical analysis events."""
     # Combine AI results with sample events for testing
-    all_events = events_json_ai_highlighted
+    all_events = app_state.get_events()
     return render_template('events.html', events=all_events)
 
 @app.route("/events/<int:event_id>")
 def event_detail(event_id):
     """Display details for a specific event."""
     # Find event in both AI results and sample events
-    all_events = events_json_ai_highlighted
+    all_events = app_state.get_events()
+    print(all_events)
     event = next((e for e in all_events if e.get('id') == event_id), None)
     
     if event is None:
@@ -84,10 +96,10 @@ def analyze_text():
                     cleaned_json = clean_json_response(raw_response)
                     json_answer = parse_json_cleaned_json(cleaned_json)
                     
-                    events_json_ai_highlighted = handle_events_from_obj_to_list(json_answer)
+                    app_state.update_events(handle_events_from_obj_to_list(json_answer))
                     
                     # Return to events page with all events
-                    all_events = events_json_ai_highlighted
+                    all_events = app_state.get_events()
                     return render_template('events.html', events=all_events)
                     
                 except Exception as ai_error:

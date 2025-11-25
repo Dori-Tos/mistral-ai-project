@@ -2,4 +2,8 @@
 /.venv
 /data
 /__pycache__
-/app/uploads
+
+*.__pycache__
+*.pyc
+/app/uploads/*
+/app/json_evnts/*
