@@ -198,7 +198,11 @@ def format_file_size(size_bytes: int) -> str:
     return f"{s} {size_names[i]}"
 
 def save_input_text(input_txt: str):
-    f = open("./uploads/temporary.txt", 'x')
+    """Save input text to a temporary file."""
+        
+    if not os.path.exists("./uploads/temporary.txt"):
+        open("./uploads/temporary.txt", "x").close()
+        
     
     with open("./uploads/temporary.txt", "w") as f:
         f.write(input_txt)
@@ -207,6 +211,9 @@ def save_input_text(input_txt: str):
 def save_json(input_json_data):
     """Save JSON data to file with proper formatting and double quotes."""
     
+    if not os.path.exists("./json_events/"):
+        os.makedirs("./json_events/")
+
     try:
         os.remove("./json_events/temporary.json")
     except FileNotFoundError:
@@ -231,17 +238,31 @@ def save_json(input_json_data):
             f.write(str(input_json_data))
             print("Saved as string representation")
         
-def clear_temporary_file():
-    print("Clearing temporary file...")
-    try:
-        os.remove("./uploads/temporary.txt")
-    except Exception as e:
-        print(f"Error deleting temporary txt file: {e}")
+def empty_directory(dir_path: str):
+    """Remove all files from the specified directory."""
     
+    if not os.path.exists(dir_path):
+        return  # Directory does not exist
+    if not os.path.isdir(dir_path):
+        return  # Not a directory
+    # Empty directory
+    for filename in os.listdir(dir_path):
+        file_path = os.path.join(dir_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+    
+            
+def clear_temporary_json():
     try:
-        os.remove("./json_events/temporary.json")
+        empty_directory("./json_events/")
     except Exception as e:
         print(f"Error deleting temporary json file: {e}")
+
+def clear_temporary_uploads():
+    try:
+        empty_directory("./uploads/")
+    except Exception as e:
+        print(f"Error deleting temporary upload files: {e}")
         
 
 def clean_json_response(response: str) -> str:
