@@ -34,7 +34,6 @@ if not os.path.exists(UPLOAD_FOLDER):
 @app.route("/")
 def home():
     """Render the home page for the AI Historical Fact Checker."""
-    clear_temporary_file()
     return render_template('index.html')
 
 @app.route("/import")
@@ -70,7 +69,7 @@ def analyze_text():
     try:
         # Get the submitted text
         historical_text = request.form.get('historical_text', '').strip()
-        
+        clear_temporary_file()
         # Server-side validation
         if not historical_text:
             text_error = "Please enter some historical text to analyze."
