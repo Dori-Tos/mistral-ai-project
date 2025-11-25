@@ -174,10 +174,72 @@ textarea {
     transition: border-color 0.3s ease;
 }
 
+/* Large textarea for maximum text input space */
+.large-textarea {
+    min-height: 400px;
+    max-height: 600px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
 textarea:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Document Information Section */
+.document-info {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.document-info .form-group {
+    margin-bottom: 15px;
+}
+
+.document-info .form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Input Field Styles */
+input[type="text"], 
+input[type="date"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Date input specific styles */
+input[type="date"] {
+    color: #555;
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+/* Placeholder styling for older browsers */
+input[type="date"]:invalid {
+    color: #999;
 }
 
 /* File Upload Styles */
@@ -189,6 +251,19 @@ textarea:focus {
     transition: all 0.3s ease;
     background: #fafbfc;
     position: relative;
+}
+
+.file-upload-area.compact {
+    padding: 25px 20px;
+}
+
+.file-upload-area.compact .upload-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.file-upload-area.compact h4 {
+    display: none;
 }
 
 .file-upload-area:hover {

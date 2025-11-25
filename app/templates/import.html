@@ -34,15 +34,16 @@
           <form class="text-form" action="/analyze-text" method="post">
             <div class="form-group">
               <label for="historical-text"
-                >Enter Historical Text or Facts:</label
+                >Enter Historical Text or Facts with context:</label
               >
               <textarea
                 id="historical-text"
                 name="historical_text"
                 placeholder="Paste your historical text here for fact-checking analysis. For example: 'The Battle of Hastings took place in 1066 when William the Conqueror defeated Harold II...'"
-                rows="8"
+                rows="15"
                 minlength="10"
                 required
+                class="large-textarea"
                 value="{{ request.form.get('historical_text', '') }}"
               >
 {{ request.form.get('historical_text', '') }}</textarea
@@ -69,10 +70,8 @@
             method="post"
             enctype="multipart/form-data"
           >
-            <div class="file-upload-area">
+            <div class="file-upload-area compact">
               <div class="upload-content">
-                <div class="upload-icon">📄</div>
-                <h4>Select your document</h4>
                 <label for="file-input" class="file-browse-btn">
                   Browse from Computer
                 </label>
@@ -86,6 +85,44 @@
                 <p class="file-info">Supported formats: PDF, TXT (Max 10MB)</p>
               </div>
             </div>
+            
+            <!-- Additional Document Information -->
+            <div class="document-info">
+              <div class="form-group">
+                <label for="document-date">Document Date (Optional):</label>
+                <input
+                  type="date"
+                  id="document-date"
+                  name="document_date"
+                  min="0001-01-01"
+                  max="2025-12-31"
+                  placeholder="Select document date"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="document-author">Author (Optional):</label>
+                <input
+                  type="text"
+                  id="document-author"
+                  name="document_author"
+                  placeholder="Enter document author or source"
+                  maxlength="100"
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="document-comment">Additional Notes (Optional):</label>
+                <textarea
+                  id="document-comment"
+                  name="document_comment"
+                  placeholder="Add any additional context or comments about this document"
+                  rows="3"
+                  maxlength="500"
+                ></textarea>
+              </div>
+            </div>
+            
             <button type="submit" class="submit-btn">
               <span class="btn-icon">📊</span>
               Analyze Document
