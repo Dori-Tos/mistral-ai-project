@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import os
 import sys
-from werkzeug.utils import secure_filename
 
 # Add the parent directory to the Python path to import aiFeatures
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -22,7 +21,7 @@ class AppState:
         
     def get_events(self):
         return self.__events_json_ai_highlighted
-    
+
 
 app_state = AppState()
 
@@ -75,8 +74,8 @@ def analyze_text():
             text_error = "Please enter some historical text to analyze."
         elif len(historical_text) < 10:
             text_error = "Please enter at least 10 characters of historical text."
-        elif len(historical_text) > 10000:  # Reasonable limit
-            text_error = "Text is too long. Please limit to 10,000 characters."
+        elif len(historical_text) > 2000:  # Reasonable limit
+            text_error = "Text is too long. Please limit to 2000 characters."
         else:
             # Validate text content
             is_valid, validation_error = validate_text_content(historical_text)
@@ -126,19 +125,19 @@ def analyze_pdf():
         # Check if file was uploaded
         if 'document_file' not in request.files:
             file_error = "No file was selected. Please choose a file to upload."
-            return render_template('index.html', file_error=file_error)
+            return render_template('import.html', file_error=file_error)
         
         file = request.files['document_file']
         
         # Check if file was actually selected
         if file.filename == '':
             file_error = "No file was selected. Please choose a file to upload."
-            return render_template('index.html', file_error=file_error)
+            return render_template('import.html', file_error=file_error)
         
         # Validate file type
         if not allowed_file(file.filename):
             file_error = f"Invalid file type. Please upload files with extensions: {', '.join(ALLOWED_EXTENSIONS)}"
-            return render_template('index.html', file_error=file_error)
+            return render_template('import.html', file_error=file_error)
         
         # Check file size (Flask doesn't automatically enforce this)
         file.seek(0, 2)  # Seek to end of file
@@ -147,32 +146,33 @@ def analyze_pdf():
         
         if file_size > MAX_FILE_SIZE:
             file_error = f"File is too large ({format_file_size(file_size)}). Maximum size allowed is {format_file_size(MAX_FILE_SIZE)}."
-            return render_template('index.html', file_error=file_error)
+            return render_template('import.html', file_error=file_error)
         
         if file_size == 0:
             file_error = "The uploaded file is empty. Please choose a valid file."
-            return render_template('index.html', file_error=file_error)
+            return render_template('import.html', file_error=file_error)
         
-        # Save the file (for future processing)
-        filename = secure_filename(file.filename)
-        
-        # Add timestamp to filename to avoid conflicts
-        import time
-        timestamp = str(int(time.time()))
-        name, ext = os.path.splitext(filename)
-        unique_filename = f"{name}_{timestamp}{ext}"
-        
-        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
-        file.save(filepath)
+        filepath = save_pdf_file(file)
         
         # Process the file (placeholder for future implementation)
         file_success = f"File analysis feature is coming soon! Your file '{file.filename}' ({format_file_size(file_size)}) has been uploaded successfully and will be processed when the feature is ready."
         
-        # Here you would typically:
         # 1. Extract text from PDF/DOC files
+        text_content = extract_text_from_file(filepath)
+        print(text_content)
+        
         # 2. Call Mistral AI API with the extracted text
-        # 3. Process the results
-        # 4. Return analysis results
+        raw_response = ai_client.list_event_facts(text_content)
+                    
+        # Clean the JSON response
+        cleaned_json = clean_json_response(raw_response)
+        json_answer = parse_json_cleaned_json(cleaned_json)
+        
+        app_state.update_events(handle_events_from_obj_to_list(json_answer))
+        
+        # Return to events page with all events
+        all_events = app_state.get_events()
+        return render_template('events.html', events=all_events)
         
         print(f"File uploaded successfully: {filepath}")  # Debug log
         

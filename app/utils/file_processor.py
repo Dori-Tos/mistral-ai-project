@@ -9,6 +9,9 @@ import pypdf
 import re
 import math
 import json
+import time
+from werkzeug.utils import secure_filename
+
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
@@ -82,17 +85,53 @@ def extract_text_from_pdf(filepath: str) -> Tuple[bool, str]:
             text_content = ""
             
             for page in pdf_reader.pages:
-                text_content += page.extract_text() + "\n"
+                text_content += page.extract_text() + " "
             
             if not text_content.strip():
                 return False, "PDF appears to be empty or contains only images"
-                
-            return True, text_content
+            
+            # Clean the text content
+            cleaned_text = clean_extracted_text(text_content)
+            return True, cleaned_text
             
     except ImportError:
         return False, "PDF processing not available. PyPDF2 library not installed."
     except Exception as e:
         return False, f"Error reading PDF file: {str(e)}"
+
+
+def clean_extracted_text(text: str) -> str:
+    """
+    Clean extracted text by removing unnecessary line breaks and formatting issues.
+    
+    Args:
+        text (str): Raw extracted text
+        
+    Returns:
+        str: Cleaned, readable text
+    """
+    if not text:
+        return text
+    
+    # Replace multiple whitespace characters (including \n, \r, \t) with single spaces
+    cleaned = re.sub(r'\s+', ' ', text)
+    
+    # Remove extra spaces around punctuation
+    cleaned = re.sub(r'\s+([,.!?;:])', r'\1', cleaned)
+    cleaned = re.sub(r'([.!?])\s*([A-Z])', r'\1 \2', cleaned)
+    
+    # Fix common PDF extraction issues
+    cleaned = re.sub(r'-\s+', '', cleaned)  # Remove hyphenation breaks
+    cleaned = re.sub(r'\s*-\s*', '-', cleaned)  # Fix spacing around hyphens
+    
+    # Ensure proper spacing after periods
+    cleaned = re.sub(r'\.([A-Za-z])', r'. \1', cleaned)
+    
+    # Remove multiple consecutive spaces
+    cleaned = re.sub(r' +', ' ', cleaned)
+    
+    return cleaned.strip()
+
 
 def validate_text_content(text: str) -> Tuple[bool, str]:
     """
@@ -256,3 +295,16 @@ def handle_events_from_obj_to_list(json_answer):
     else:
         print("Parsed JSON is not a dict or list of dicts; nothing added to events")
     return events_json_ai_highlighted_list
+
+
+def save_pdf_file(file: object):
+        # Save the file (for future processing)
+        filename = secure_filename(file.filename)
+
+        timestamp = str(int(time.time()))
+        name, ext = os.path.splitext(filename)
+        unique_filename = f"{name}_{timestamp}{ext}"
+        
+        filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+        file.save(filepath)
+        return filepath
