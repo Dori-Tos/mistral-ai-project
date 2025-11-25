@@ -1,96 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Historical Fact Checker - Powered by Mistral AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <h1>AI Historical Fact Checker</h1>
-                <p class="subtitle">Powered by Mistral AI</p>
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <h1>AI Historical Fact Checker</h1>
+          <p class="subtitle">Powered by Mistral AI</p>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Introduction Section -->
+        <section class="intro-section">
+          <h2>Welcome to AI Historical Fact Checker</h2>
+          <p class="description">
+            Our advanced AI-powered platform leverages the cutting-edge Mistral
+            AI API to analyze historical documents and verify the reliability of
+            facts and events. Whether you're a researcher, historian, student,
+            or simply curious about the accuracy of historical information, our
+            tool provides comprehensive fact-checking capabilities.
+          </p>
+
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">📄</div>
+              <h3>Document Analysis</h3>
+              <p>
+                Upload and analyze historical documents in various formats
+                including PDF files.
+              </p>
             </div>
-        </header>
+            <div class="feature-card">
+              <div class="feature-icon">🧠</div>
+              <h3>AI-Powered Verification</h3>
+              <p>
+                Utilize Mistral AI's advanced language model to cross-reference
+                and verify historical facts.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">⚡</div>
+              <h3>Real-time Processing</h3>
+              <p>
+                Get instant analysis and fact-checking results with detailed
+                reliability scores.
+              </p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📊</div>
+              <h3>Comprehensive Reports</h3>
+              <p>
+                Receive detailed reports highlighting verified facts, potential
+                inaccuracies, and sources.
+              </p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div>
+            <a href="{{ url_for('import_page') }}" class="cta-button"
+              >Try It Now</a
+            >
+          </div>
+        </section>
+        <!-- How It Works Section -->
+        <section class="how-it-works">
+          <h2>How It Works</h2>
+          <div class="steps-container">
+            <div class="step">
+              <div class="step-number">1</div>
+              <h3>Submit Content</h3>
+              <p>
+                Upload your historical document or paste text directly into our
+                platform.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <h3>AI Analysis</h3>
+              <p>
+                Our Mistral AI processes the content, identifying historical
+                facts and events.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <h3>Fact Verification</h3>
+              <p>
+                Each fact is cross-referenced against historical databases and
+                reliable sources.
+              </p>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <h3>Detailed Report</h3>
+              <p>
+                Receive a comprehensive report with reliability scores and
+                source citations.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Introduction Section -->
-            <section class="intro-section">
-                <h2>Welcome to AI Historical Fact Checker</h2>
-                <p class="description">
-                    Our advanced AI-powered platform leverages the cutting-edge Mistral AI API to analyze historical documents 
-                    and verify the reliability of facts and events. Whether you're a researcher, historian, student, or 
-                    simply curious about the accuracy of historical information, our tool provides comprehensive fact-checking 
-                    capabilities.
-                </p>
-                
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">📄</div>
-                        <h3>Document Analysis</h3>
-                        <p>Upload and analyze historical documents in various formats including PDF files.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🧠</div>
-                        <h3>AI-Powered Verification</h3>
-                        <p>Utilize Mistral AI's advanced language model to cross-reference and verify historical facts.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">⚡</div>
-                        <h3>Real-time Processing</h3>
-                        <p>Get instant analysis and fact-checking results with detailed reliability scores.</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">📊</div>
-                        <h3>Comprehensive Reports</h3>
-                        <p>Receive detailed reports highlighting verified facts, potential inaccuracies, and sources.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- How It Works Section -->
-            <section class="how-it-works">
-                <h2>How It Works</h2>
-                <a href="{{ url_for('import_page') }}" class="cta-button">Try It Now</a>
-                <div class="steps-container">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <h3>Submit Content</h3>
-                        <p>Upload your historical document or paste text directly into our platform.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <h3>AI Analysis</h3>
-                        <p>Our Mistral AI processes the content, identifying historical facts and events.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <h3>Fact Verification</h3>
-                        <p>Each fact is cross-referenced against historical databases and reliable sources.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">4</div>
-                        <h3>Detailed Report</h3>
-                        <p>Receive a comprehensive report with reliability scores and source citations.</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2025 AI Historical Fact Checker. Powered by Mistral AI.</p>
-            <p class="disclaimer">
-                <strong>Note:</strong> This application is currently in development. 
-                The analysis features will be available soon.
-            </p>
-        </footer>
+      <!-- Footer -->
+      <footer class="footer">
+        <p>&copy; 2025 AI Historical Fact Checker. Powered by Mistral AI.</p>
+        <p class="disclaimer">
+          <strong>Note:</strong> This application is currently in development.
+          The analysis features will be available soon.
+        </p>
+      </footer>
     </div>
-
-</body>
+  </body>
 </html>
