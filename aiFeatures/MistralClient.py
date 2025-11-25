@@ -151,8 +151,16 @@ class MistralClient:
         chain = full_prompt | self.llm | parser
         return chain.invoke({"prompt": prompt})
 
-    def list_event_facts(self, text: str) -> str:
+    def list_event_facts(self, text: str, author: str = "", date: str = "", comment: str = "") -> str:
         """Extract factual statements & historical events from text"""
+        
+        author_info = f"Author of the submitted text: {author}" if author else ""
+        date_info = f"Date when the text was written: {date}" if date else ""
+        comment_info = f"Comment about the submitted text : {comment}" if comment else ""
+        
+        complementary_info = "- \n".join(filter(None, [author_info, date_info, comment_info]))
+        print(f"Important complementary info :\n{complementary_info}")
+        
         prompt = f"""List all factual statements from the following text.
 
             Return the events as a valid JSON ARRAY containing objects with this exact structure:
@@ -160,6 +168,9 @@ class MistralClient:
 
             Requirements:
             - Each content field must be an exact citation from the following text
+            - The author is the person who made the statement in the text
+            - The date is the year when the statement was made or when the source medium was created
+            - The source medium is not can be a book, article, speech, document, etc. other than the submitted text
             - If there are multiple events, return them as an array: [{{"..."}}, {{"..."}}]
             - If there is only one event, still return it as an array with one object: [{{"..."}}]
             - Return ONLY the raw JSON array without any markdown formatting, code blocks, or additional text
@@ -171,8 +182,8 @@ class MistralClient:
             [
             {{
                 "id": 1,
-                "author": "Author Name",
-                "date": "Year",
+                "author": "Author Name of the source medium",
+                "date": "Year when the source medium was created",
                 "title": "Event Title",
                 "resume": "Brief summary of the event",
                 "content": "Exact quote from the text"
@@ -192,6 +203,9 @@ class MistralClient:
             - Do not alter the following text
             - Act as a factual historian
             - Extract only factual historical claims or events
+            
+            Here are some additional details about the submitted text:
+            {complementary_info}
 
             Here is the text to analyze: {text}"""
         response = self.run_with_tools(prompt,[])

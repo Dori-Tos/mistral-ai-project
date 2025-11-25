@@ -160,6 +160,10 @@ def analyze_pdf():
         
         filepath = save_pdf_file(file)
         
+        author = request.form.get('document_author', '')
+        date = request.form.get('document_date', '')
+        comment = request.form.get('document_comment', '')
+        
         # Process the file (placeholder for future implementation)
         file_success = f"File analysis feature is coming soon! Your file '{file.filename}' ({format_file_size(file_size)}) has been uploaded successfully and will be processed when the feature is ready."
         
@@ -168,7 +172,7 @@ def analyze_pdf():
         print(text_content)
         
         # 2. Call Mistral AI API with the extracted text
-        raw_response = ai_client.list_event_facts(text_content)
+        raw_response = ai_client.list_event_facts(text_content, author=author, date=date, comment=comment)
                     
         # Clean the JSON response
         cleaned_json = clean_json_response(raw_response)
