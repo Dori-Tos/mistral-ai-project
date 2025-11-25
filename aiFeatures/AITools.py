@@ -1,7 +1,7 @@
 
 from datetime import datetime
 import wikipedia
-
+import requests
 
 class AITools:
     """Collection of tools that can be used by the AI client"""
@@ -16,12 +16,58 @@ class AITools:
     
     @staticmethod
     def search_wikipedia(query: str) -> str:
-        """Search Wikipedia for information about a topic"""
+        """Search Wikipedia for information about a topic.
+        Args:
+            query: The search query or topic to look up on Wikipedia.
+        Returns:
+            Summary of the Wikipedia article or error message.
+        """
         try:
-            return wikipedia.summary(query, sentences=3)
+            # Set language to English
+            wikipedia.set_lang("en")
+            # Get summary (all sentences)
+            summary = wikipedia.summary(query)
+            return summary
+        except wikipedia.exceptions.DisambiguationError as e:
+            # Multiple possible pages - return the options
+            options = ", ".join(e.options[:5])
+            return f"Multiple results found. Please be more specific. Options: {options}"
+        except wikipedia.exceptions.PageError:
+            return f"No Wikipedia page found for '{query}'"
         except Exception as e:
-            return f"Error searching Wikipedia: {str(e)}"
-    
+            return f"Wikipedia search error: {e}"
+        
+    @staticmethod
+    def search_ninja_api(ninja_api_key: str, query: str, year=None, month=None, day=None) -> str:
+        """Search a list of historical events associated with the query, can be more focused by using the date, this API is hosted on ninja API.
+        Args:
+            ninja_api_key: API key for the Ninja API.
+            query: Specific topic to search for.
+            year (optional): Year of the date to search for (can be negative to represent BC).
+            month (optional): Month of the date to search for.
+            day (optional): Day of the date to search for.
+        Returns:
+            List of the events, their summaries and dates.
+        """
+        
+        params = {
+            "text": query,
+            "year": year,
+            "month": month,
+            "day": day,
+        }
+        
+        response = requests.get(
+            "https://api.api-ninjas.com/v1/historicalevents",
+            headers={
+                "X-Api-Key": ninja_api_key,
+            },
+            params=params,
+        ).text
+        
+        return response
+        
+            
 
 # Helper function to get all tool functions
 def get_all_tools():
@@ -29,5 +75,6 @@ def get_all_tools():
     return [
         AITools.get_current_time,
         AITools.search_wikipedia,
+        AITools.search_ninja_api,
     ]
     
