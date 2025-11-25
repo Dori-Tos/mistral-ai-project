@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fact - {{ event.id }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <h1>Event Details</h1>
+          <p class="subtitle">Historical Analysis Report</p>
+        </div>
+        <nav class="navigation">
+          <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+          <a href="{{ url_for('import_page') }}" class="nav-link"
+            >Import Document</a
+          >
+          <a href="{{ url_for('events_page') }}" class="nav-link"
+            >← Back to Events</a
+          >
+        </nav>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <article class="event-detail">
+          <!-- Event Header -->
+          <header class="event-detail-header">
+            <h1 class="event-detail-title">{{ event.title }}</h1>
+            <div class="event-detail-meta">
+              <div class="meta-item">
+                <span class="meta-label">Author:</span>
+                <span class="meta-value">👤 {{ event.author }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Date:</span>
+                <span class="meta-value">📅 {{ event.date }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Analysis ID:</span>
+                <span class="meta-value">#{{ event.id }}</span>
+              </div>
+            </div>
+          </header>
+
+          <!-- Event Summary -->
+          <section class="event-summary">
+            <h2>Event Summary</h2>
+            <p class="summary-text">{{ event.resume }}</p>
+          </section>
+
+          <!-- Event Content -->
+          <section class="event-content-section">
+            <h2>Original content</h2>
+            <div class="content-text">
+              <p>{{ event.content }}</p>
+            </div>
+          </section>
+
+          <!-- Analysis Status -->
+          <section class="analysis-status">
+            <h2>AI Analysis</h2>
+            <div class="status-grid">
+              <div class="status-item verified">
+                <h3>AI Score : {{ event.ai_score }}</h3>
+                <div class="status-description">
+                  -- Processed by Mistral AI --
+                </div>
+              </div>
+              <div class="status-item published">
+                <h3>References used</h3>
+                <div class="status-description">{{event.ai_reference}}</div>
+              </div>
+              <div class="status-item published">
+                <h3>Factual statement of the event</h3>
+                <div class="status-description">
+                  {{event.ai_factual_statement}}
+                </div>
+              </div>
+              <div class="status-item published">
+                <h3>Critical analysis</h3>
+                <div class="status-description">
+                  {{event.ai_critical_analysis}}
+                </div>
+              </div>
+            </div>
+          </section>
+        </article>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>&copy; 2025 AI Historical Fact Checker. Powered by Mistral AI.</p>
+        <div class="footer-links">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('import_page') }}">Import</a>
+          <a href="{{ url_for('events_page') }}">Events</a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

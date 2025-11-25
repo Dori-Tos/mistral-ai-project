@@ -2,3 +2,9 @@
 /.venv
 /data
 /__pycache__
+
+*.__pycache__
+*.pyc
+/app/uploads/*
+/app/json_events/*
+!/app/json_events/.gitkeep

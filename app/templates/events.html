@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Analysis Events - AI Historical Fact Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>Events from your Submitted Text</h1>
+                <p class="subtitle">Click on an event to see more details</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Events List -->
+            <section class="events-section">
+                {% if events %}
+                    <div class="events-grid">
+                        {% for event in events %}
+                            <article class="event-card" onclick="location.href='{{ url_for('event_detail', event_id=event.id) }}'">
+                                <div class="event-header">
+                                    <div class="event-meta">
+                                        <span class="event-author">👤 {{ event.author }}</span>
+                                        <span class="event-date">📅 {{ event.date }}</span>
+                                    </div>
+                                </div>
+                                <div class="event-content">
+                                    <h3 class="event-title">{{ event.title }}</h3>
+                                    <p class="event-resume">{{ event.resume }}</p>
+                                </div>
+                                <div class="event-footer">
+                                    <span class="read-more">Click to read more →</span>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-events">
+                        <div class="no-events-icon">📋</div>
+                        <h3>No Events Available</h3>
+                        <p>There are currently no historical analysis events to display.</p>
+                        <a href="{{ url_for('import_page') }}" class="cta-button">Start New Analysis</a>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 AI Historical Fact Checker. Powered by Mistral AI.</p>
+            <div class="footer-links">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('import_page') }}">Import</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
