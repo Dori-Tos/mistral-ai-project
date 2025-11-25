@@ -7,4 +7,3 @@
 *.pyc
 /app/uploads/
 /app/json_events/
-!/app/json_events/.gitkeep
