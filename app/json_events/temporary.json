@@ -1,18 +1,58 @@
 [
   {
     "id": 1,
-    "author": "Harrison Ford",
-    "date": "1987",
-    "title": "Harrison Ford's Claim About Gary Moore",
-    "resume": "Harrison Ford claimed he was in love with Gary Moore.",
-    "content": "Harrison ford once claimed he was in love with gary moore, as I learned in the last novel of Francis Ford Coppola from 1987."
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Campagne de phishing Labos de Sécurité",
+    "resume": "Exercice pédagogique visant à sensibiliser les étudiants aux techniques de phishing et à l’efficacité des filtres anti-phishing.",
+    "content": "Cet exercice vise à sensibiliser les étudiants aux techniques de phishing et à l’efficacité des filtres anti-phishing."
   },
   {
     "id": 2,
-    "author": "Star Wars",
-    "date": "2021",
-    "title": "Princess Leia's Physical Traits",
-    "resume": "Princess Leia has 6 toes on each foot.",
-    "content": "In the last episod of star wars from 2021 we also learn that Princess Leia has 6 toes on each foot."
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Organisation de l'exercice",
+    "resume": "L’exercice est divisé en deux phases et réalisé par des groupes de 4 à 5 étudiants.",
+    "content": "L’exercice est divisé en deux phases et est réalisé par des groupes de 4 à 5 étudiants."
+  },
+  {
+    "id": 3,
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Phase 1: envoi contrôlé",
+    "resume": "Les étudiants soumettent des fichiers HTML via Teams pour validation et configuration dans l’outil Microsoft Defender Campaign Manager.",
+    "content": "Les étudiants soumettent des fichiers .htmlcompatibles via Teams pour validation et configuration dans l’outil Microsoft Defender Campaign Manager."
+  },
+  {
+    "id": 4,
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Phase 2: hosting et tentative de contournement des protections",
+    "resume": "Les étudiants envoient leurs emails à une liste d’adresses factices du domaine de l’ECAM et essaient de contourner le détecteur de phishing.",
+    "content": "Lesétudiantsenvoientleursemailsàunelisted’adressesfacticesdudomainedel’ECAMdisponible sur Teams et essaient de contourner le détecteur de phishing."
+  },
+  {
+    "id": 5,
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Consignes de sécurité et encadrement",
+    "resume": "Aucun envoi direct par les étudiants: tous les mails et pages doivent passer par la validation.",
+    "content": "Aucun envoi direct par les étudiants: tous les mails et pages doivent passer par la validation."
+  },
+  {
+    "id": 6,
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Barème d’évaluation",
+    "resume": "Le travail est noté sur 15 points, répartis entre les deux phases et plusieurs critères de qualité.",
+    "content": "Le travail est noté sur 15 points, répartis entre les deux phases et plusieurs critères de qualité."
+  },
+  {
+    "id": 7,
+    "author": "Master Informatique",
+    "date": "2023",
+    "title": "Notes importantes et rappel à l’éthique",
+    "resume": "L’exercice est strictement pédagogique. Toute action hors périmètre est interdite et sanctionnée.",
+    "content": "L’exerciceeststrictementpédagogique. Touteactionhorspérimètre(envoiversdesadresses réelles, collecte de mots de passe, exploitation malveillante des données) est interdite et sanctionnée."
   }
 ]

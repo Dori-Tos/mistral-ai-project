@@ -65,10 +65,13 @@ def analyze_text():
     text_error = None
     text_success = None
     
+    clear_temporary_uploads()
+    clear_temporary_json()
+    
     try:
         # Get the submitted text
         historical_text = request.form.get('historical_text', '').strip()
-        clear_temporary_file()
+
         # Server-side validation
         if not historical_text:
             text_error = "Please enter some historical text to analyze."
@@ -120,6 +123,9 @@ def analyze_pdf():
     """Handle file analysis requests with server-side validation."""
     file_error = None
     file_success = None
+    
+    clear_temporary_uploads()
+    clear_temporary_json()
     
     try:
         # Check if file was uploaded
