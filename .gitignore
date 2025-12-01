@@ -7,3 +7,4 @@
 *.pyc
 /app/uploads/
 /app/json_events/
+/History_syllabus/*
