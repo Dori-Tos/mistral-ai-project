@@ -3,7 +3,8 @@ Test script to verify the MistralEmbedClient is working correctly.
 Run this to test your embedding client with a sample PDF.
 """
 
-from aiFeatures.EmbeddingClient import get_embedding_client
+from aiFeatures.EmbeddingClient import get_embedding_client, get_vector_store_manager
+
 import os
 
 def test_embedding_client():
@@ -65,6 +66,18 @@ def test_embedding_client():
     except Exception as e:
         print(f"❌ Error during testing: {e}")
         print("Please check your .env file contains MISTRAL_API_KEY")
+        
+        
+def test_vector_store_manager():
+    """Test the vector store manager functionality."""
+    print("Testing VectorStoreManager...")
+    
+    # Get the vector store manager instance
+    vsm = get_vector_store_manager()
+    print("✓ VectorStoreManager initialized successfully")
+    
+    # Further tests can be added here as needed
 
 if __name__ == "__main__":
     test_embedding_client()
+    test_vector_store_manager() 

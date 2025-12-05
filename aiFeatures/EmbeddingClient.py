@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from mistralai import Mistral
 import os
+import json
 import hashlib
 from typing import Optional, List, Dict, Any, Set
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -160,7 +161,6 @@ class MistralEmbedClient:
         if self.vector_store is not None:
             self.vector_store.save_local(file_path)
             # Save document hashes separately
-            import json
             with open(f"{file_path}_metadata.json", "w") as f:
                 json.dump({
                     "document_hashes": list(self.document_hashes),
@@ -173,7 +173,6 @@ class MistralEmbedClient:
         
         # Load document hashes
         try:
-            import json
             with open(f"{file_path}_metadata.json", "r") as f:
                 metadata = json.load(f)
                 self.document_hashes = set(metadata.get("document_hashes", []))
@@ -182,7 +181,63 @@ class MistralEmbedClient:
             self.document_hashes = set()
         
         return self.vector_store
+    
+
+
+class VectorStoreManager:
+    """Separate class for managing vector stores"""
+    
+    def __init__(self, embeddings: MistralAIEmbeddings):
+        self.embeddings = embeddings
+        self.vector_store: Optional[FAISS] = None
+    
+    def add_documents(self, documents: List[Document]) -> None:
+        """Add documents to vector store"""
+        if self.vector_store is None:
+            self.vector_store = FAISS.from_documents(documents, self.embeddings)
+        else:
+            new_store = FAISS.from_documents(documents, self.embeddings)
+            self.vector_store.merge_from(new_store)
+    
+    def get_retriever(self, k: int = 5, threshold: float = 0.7, **kwargs):
+        """Get retriever for querying"""
+        if self.vector_store is None:
+            raise ValueError("Vector store not initialized")
+        return self.vector_store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"k": k, "score_threshold": threshold})
+    
+    
+    def search(self, query: str, k: int = 5) -> List[Document]:
+        """Direct similarity search"""
+        if self.vector_store is None:
+            return []
+        return self.vector_store.similarity_search(query, k=k)
+    
+    def search_with_retriever(self, query: str, k: int = 5, threshold: float = 0.7) -> List[Document]:
+        """Search using retriever with score threshold"""
+        if self.vector_store is None:
+            return []
+        retriever = self.get_retriever(k=k, threshold=threshold)
+        return retriever.invoke(query)
+    
+    def save_vector_store(self, file_path: str) -> None:
+        """Save the vector store to disk."""
+        if self.vector_store is not None:
+            self.vector_store.save_local(file_path)
+    
+    def load_vector_store(self, file_path: str) -> None:
+        """Load a vector store from disk."""
+        self.vector_store = FAISS.load_local(
+            file_path, 
+            self.embeddings, 
+            allow_dangerous_deserialization=True
+        )
+
 
 def get_embedding_client() -> MistralEmbedClient:
     """Get or create the AI service instance"""
     return MistralEmbedClient()
+
+def get_vector_store_manager() -> VectorStoreManager:
+    """Get a vector store manager instance"""
+    client = get_embedding_client()
+    return VectorStoreManager(client.embeddings)

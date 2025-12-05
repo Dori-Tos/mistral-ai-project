@@ -11,3 +11,7 @@
 /app/uploads/
 /app/json_events/
 /History_syllabus/*
+/RAG_vector_store/
+
+test_embedding_client.py
+test_rag_system.py
