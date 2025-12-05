@@ -5,6 +5,9 @@
 
 *.__pycache__
 *.pyc
+*.ipynb
+*.ipynb_checkpoints
+
 /app/uploads/
 /app/json_events/
 /History_syllabus/*
