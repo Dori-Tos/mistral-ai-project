@@ -2,7 +2,7 @@
 from datetime import datetime
 import wikipedia
 import requests
-import EmbeddingClient
+import aiFeatures.EmbeddingClient
 
 
 class AITools:
@@ -79,7 +79,7 @@ class AITools:
         """
         try:
             # Try to use the singleton client first (if it has data loaded)
-            client = EmbeddingClient.get_embedding_client()
+            client = aiFeatures.EmbeddingClient.get_embedding_client()
             
             # If the client's vector store is empty, try to load from disk
             if client.vector_store is None:
@@ -111,6 +111,14 @@ def get_all_tools():
         AITools.get_current_time,
         AITools.search_wikipedia,
         AITools.search_ninja_api,
+        AITools.search_rag,
+    ]
+    
+def get_fact_analysis_tools():
+    """Returns a list of fact-checking and RAG tool functions"""
+    return [
+        #AITools.search_wikipedia,
+        #AITools.search_ninja_api,
         AITools.search_rag,
     ]
     
