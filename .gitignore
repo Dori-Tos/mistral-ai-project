@@ -7,6 +7,7 @@
 *.pyc
 *.ipynb
 *.ipynb_checkpoints
+*.zip
 
 /app/uploads/
 /app/json_events/
