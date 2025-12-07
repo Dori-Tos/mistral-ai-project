@@ -329,3 +329,12 @@ def save_pdf_file(file: object):
         filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
         file.save(filepath)
         return filepath
+    
+def add_event_details(event, analysis):
+    """Add AI analysis details to an event dictionary."""
+    event['accuracy'] = analysis.get('accuracy', 'N/A')
+    event['biases'] = analysis.get('biases', 'N/A')
+    event['contextualization'] = analysis.get('contextualization', 'N/A')
+    event['references'] = analysis.get('references', [])
+    event['ai_score'] = analysis.get('score', 0)
+    return event

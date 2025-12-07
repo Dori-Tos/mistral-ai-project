@@ -238,6 +238,7 @@ class MistralClient:
                 "accuracy": string,          # Assessment of accuracy
                 "biases": string,            # Identified biases or perspectives
                 "contextualization": string   # Context within historical period
+                "references ": [string]   # List of verified sources used in the analysis
             }}
 
             Important instructions:
