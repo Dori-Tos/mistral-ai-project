@@ -73,39 +73,28 @@
             <h2>AI Analysis</h2>
             <div class="status-grid">
               <div class="status-item verified">
-                <h3>AI Score : {{ event.ai_score }}</h3>
-                <div class="status-description">
-                  <h2>Processed by Mistral AI as follow :</h2>
-                  <ul>
-                    <li>3/3 : event cited is identical to internal sources</li>
-                    <li>2/3 : event verified by external sources</li>
-                    <li>
-                      1/3 : event verified by external sources but contains
-                      discrepancies with internal sources
-                    </li>
-                    <li>
-                      0/3 : event not verified or contains significant
-                      discrepancies
-                    </li>
-                  </ul>
-                </div>
+                <h3>AI Score : {{ event.score }} 
+                  <span class="info-icon" title="3/3: event cited is identical to internal sources&#10;2/3: event verified by external sources&#10;1/3: event verified by external sources but contains discrepancies with internal sources&#10;0/3: event not verified or contains significant discrepancies">ℹ️</span>
+                </h3>
               </div>
               <div class="status-item published">
                 <h3>Accuracy</h3>
-                <div class="status-description">
-                  {{event.accuracy}}
-                </div>
+                <div class="status-description">{{event.accuracy}}</div>
               </div>
               <div class="status-item published">
                 <h3>Biases</h3>
-                <div class="status-description">
-                  {{event.biases}}
-                </div>
+                <div class="status-description">{{event.biases}}</div>
               </div>
               <div class="status-item published">
                 <h3>Contextualization</h3>
                 <div class="status-description">
                   {{event.contextualization}}
+                </div>
+              </div>
+              <div class="status-item published">
+                <h3>References</h3>
+                <div class="status-description">
+                  {{event.references}}
                 </div>
               </div>
             </div>

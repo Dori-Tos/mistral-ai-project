@@ -757,3 +757,49 @@ input[type="date"]:invalid {
         padding: 20px 15px;
     }
 }
+
+/* Info Icon Tooltip Styles */
+.info-icon {
+    display: inline-block;
+    cursor: help;
+    font-size: 0.9em;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    position: relative;
+}
+
+.info-icon:hover {
+    opacity: 1;
+}
+
+.info-icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% + 10px);
+    background: #2c3e50;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    white-space: pre-line;
+    z-index: 1000;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    min-width: 300px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    text-align: left;
+    font-weight: normal;
+}
+
+.info-icon:hover::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: calc(100% + 2px);
+    border: 8px solid transparent;
+    border-bottom-color: #2c3e50;
+    z-index: 1001;
+}

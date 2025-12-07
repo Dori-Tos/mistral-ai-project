@@ -336,5 +336,5 @@ def add_event_details(event, analysis):
     event['biases'] = analysis.get('biases', 'N/A')
     event['contextualization'] = analysis.get('contextualization', 'N/A')
     event['references'] = analysis.get('references', [])
-    event['ai_score'] = analysis.get('score', 0)
+    event['score'] = analysis.get('score', 0)
     return event
