@@ -19,6 +19,49 @@ class AITools:
         """Get the current date and time"""
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    @staticmethod
+    def check_wikipedia_reliability(query: str) -> str:
+        """Check if a Wikipedia page has citation/sourcing issues.
+        Args:
+            query: The Wikipedia page title to check.
+        Returns:
+            Reliability assessment with any warnings found.
+        """
+        try:
+            wiki_wiki = wikipediaapi.Wikipedia(
+                user_agent='HistoricalFactChecker/1.0',
+                language='en'
+            )
+            
+            page = wiki_wiki.page(query)
+            
+            if not page.exists():
+                return f"Page '{query}' not found."
+            
+            # Check for problematic categories
+            warning_keywords = [
+                'unsourced', 'unreferenced', 'citation', 'verify', 
+                'disputed', 'unreliable', 'lacking sources', 
+                'needs additional', 'questionable'
+            ]
+            
+            issues = []
+            for category in page.categories.keys():
+                cat_lower = category.lower()
+                for keyword in warning_keywords:
+                    if keyword in cat_lower and 'category:' in cat_lower:
+                        # Clean up category name for display
+                        clean_cat = category.replace('Category:', '').replace('_', ' ')
+                        issues.append(clean_cat)
+                        break
+            
+            if issues:
+                return f"⚠️ WARNING: '{page.title}' has sourcing issues:\n" + "\n".join(f"  - {issue}" for issue in issues[:5])
+            else:
+                return f"✓ '{page.title}' appears to be well-sourced (no citation warnings found)."
+                
+        except Exception as e:
+            return f"Error checking reliability: {e}"
         
     @staticmethod
     def get_wikipedia_sections(query: str) -> str:
@@ -41,6 +84,21 @@ class AITools:
             if not page.exists():
                 return f"No Wikipedia page found for '{query}'"
             
+            # Check for reliability issues
+            warning_keywords = [
+                'unsourced', 'unreferenced', 'citation', 'verify', 
+                'disputed', 'unreliable', 'lacking sources'
+            ]
+            
+            has_issues = any(
+                any(keyword in cat.lower() for keyword in warning_keywords)
+                for cat in page.categories.keys()
+            )
+            
+            reliability_note = ""
+            if has_issues:
+                reliability_note = "\n⚠️ WARNING: This article has citation/sourcing issues and may not be reliable.\n"
+            
             # Extract section titles recursively
             def get_sections(sections, level=0):
                 section_list = []
@@ -57,9 +115,9 @@ class AITools:
             if not sections:
                 # Return summary if no sections
                 summary = page.summary[:500]
-                return f"Page found but no sections available.\n\nSummary:\n{summary}..."
+                return f"Article: {page.title}{reliability_note}\nPage found but no sections available.\n\nSummary:\n{summary}..."
             
-            return f"Article: {page.title}\n\nSections:\n" + "\n".join(sections)
+            return f"Article: {page.title}{reliability_note}\nSections:\n" + "\n".join(sections)
             
         except Exception as e:
             return f"Wikipedia search error: {e}"
@@ -214,8 +272,8 @@ def get_all_tools():
     """Returns a list of all tool functions"""
     return [
         AITools.get_current_time,
-        AITools.search_wikipedia,
-        AITools.search_ninja_api,
+        AITools.check_wikipedia_reliability,
+        AITools.get_wikipedia_sections,
         AITools.search_rag,
     ]
     

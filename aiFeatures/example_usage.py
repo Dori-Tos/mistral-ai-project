@@ -93,7 +93,7 @@ def test_wikipedia_sections():
     queries = [
         "Bill Gates",
         "World War II",
-        "Artificial Intelligence",
+        "Ancient astronauts",  # Known to have citation issues
         "Climate Change"
     ]
     
@@ -101,6 +101,28 @@ def test_wikipedia_sections():
         print(f"\nTesting: '{query}'")
         print("-" * 40)
         result = AITools.get_wikipedia_sections(query)
+        print(result)
+
+def test_wikipedia_reliability():
+    """
+    Test the Wikipedia reliability checker.
+    """
+    print("\n" + "="*60)
+    print("Wikipedia Reliability Check Test")
+    print("="*60)
+    
+    # Test various pages - some reliable, some with issues
+    queries = [
+        "World War II",           # Should be well-sourced
+        "Bill Gates",             # Should be well-sourced  
+        "Ancient astronauts",     # Has citation issues
+        "List of conspiracy theories"  # May have issues
+    ]
+    
+    for query in queries:
+        print(f"\nChecking: '{query}'")
+        print("-" * 40)
+        result = AITools.check_wikipedia_reliability(query)
         print(result)
         
 def test_wikipedia_section_pick():
@@ -124,6 +146,8 @@ def test_wikipedia_section_pick():
 if __name__ == "__main__":
     # Run all examples
     try:
+        test_wikipedia_reliability()
+        test_wikipedia_sections()
         test_wikipedia_section_pick()
         
         print("\n" + "=" * 60)
