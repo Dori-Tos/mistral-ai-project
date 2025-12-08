@@ -69,8 +69,9 @@ class AITools:
         
         return response
     
-    def search_rag(self, query: str, vector_store_path: str = "RAG_vector_store") -> str:
-        """Search the RAG system for information about a topic.
+    @staticmethod
+    def search_rag(query: str, vector_store_path: str = "RAG_vector_store") -> str:
+        """Search the RAG system for information about a topic. This tool MUST be called to access authorized embedded documents.
         Args:
             query: The search query or topic to look up in the RAG system.
             vector_store_path: Path to the saved vector store (default: "RAG_vector_store").

@@ -229,12 +229,14 @@ class MistralClient:
         
         prompt = f"""Provide a detailed analysis of the following historical event description.
 
-            Requirements:
-            - authorized documents are accessible only through provided tools
-            - you can only use the information from the authorized documents acquired via the tools
-            - evaluate the accuracy of the event description citing authorized documents
-            - Identify any potential biases or perspectives in the description citing authorized documents
-            - Contextualize the event within its historical period citing authorized documents
+            CRITICAL REQUIREMENTS:
+            - YOU MUST CALL the search_rag tool BEFORE providing any analysis
+            - Search for relevant information about: {event_description}
+            - Authorized documents are ONLY accessible through the search_rag tool
+            - You CANNOT analyze without first calling search_rag
+            - After retrieving information from search_rag, evaluate the accuracy citing the documents
+            - Identify any potential biases or perspectives citing the documents
+            - Contextualize the event within its historical period citing the documents
             - Only return the analysis as a JSON object with this exact structure:
             {{
                 "accuracy": string,          # Assessment of accuracy
