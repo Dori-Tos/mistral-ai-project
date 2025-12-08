@@ -32,10 +32,8 @@ class MistralEmbedClient:
             raise ValueError("MISTRAL_API_KEY is not set")
         
         self.model_name = os.getenv("EMBEDDING_MODEL", "mistral-embed")
-        self.temperature = float(os.getenv("TEMPERATURE", "0.7"))
         self.embeddings = MistralAIEmbeddings(api_key=self.api_key, model=self.model_name)
         self.client = Mistral(api_key=self.api_key)
-        self.llm = ChatMistralAI(api_key=self.api_key, model=self.model_name, temperature=self.temperature)
         
         self.vector_store: Optional[FAISS] = None
         self.document_hashes: Set[str] = set()  # Track processed documents
@@ -54,7 +52,21 @@ class MistralEmbedClient:
         try:
             loader = PyMuPDFLoader(file_path)
             documents = loader.load()
-            print(f"Successfully loaded {len(documents)} documents from {file_path}")
+            
+            # Extract just the filename from the full path
+            filename = os.path.basename(file_path)
+            
+            # Add or update metadata for each document to include the filename
+            for doc in documents:
+                if doc.metadata is None:
+                    doc.metadata = {}
+                # Keep existing source if present, otherwise use the full path
+                if 'source' not in doc.metadata:
+                    doc.metadata['source'] = file_path
+                # Add the filename as a separate field for easy citation
+                doc.metadata['filename'] = filename
+            
+            print(f"Successfully loaded {len(documents)} documents from {filename}")
             return documents
         except Exception as e:
             print(f"Error loading documents: {e}")
@@ -69,6 +81,20 @@ class MistralEmbedClient:
                 separators=["\n\n", "\n", " ", ""]
             )
             texts = text_splitter.split_documents([document])
+            
+            # Preserve original page number in metadata for all chunks
+            # If a chunk spans multiple pages due to overlap, keep the starting page
+            original_page = document.metadata.get('page', 'N/A') if document.metadata else 'N/A'
+            filename = document.metadata.get('filename', 'Unknown') if document.metadata else 'Unknown'
+            source = document.metadata.get('source', 'Unknown') if document.metadata else 'Unknown'
+            
+            for chunk in texts:
+                if chunk.metadata is None:
+                    chunk.metadata = {}
+                chunk.metadata['page'] = original_page
+                chunk.metadata['filename'] = filename
+                chunk.metadata['source'] = source
+            
             print(f"Split document into {len(texts)} chunks")
             return texts
         except Exception as e:

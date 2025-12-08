@@ -96,8 +96,54 @@ class AITools:
             if not results:
                 return "No relevant information found in the RAG system."
             
-            # Combine results into a single response
-            combined_response = "\n\n".join([f"- {res.page_content}" for res in results])
+            # Combine results with metadata (page numbers/ranges, document name)
+            combined_response = ""
+            
+            # Group results by document to create page ranges
+            doc_groups = {}
+            for res in results:
+                metadata = res.metadata if hasattr(res, 'metadata') else {}
+                filename = metadata.get('filename', metadata.get('source', 'Unknown document'))
+                page = metadata.get('page', 'N/A')
+                
+                if filename not in doc_groups:
+                    doc_groups[filename] = []
+                doc_groups[filename].append((page, res.page_content))
+            
+            # Format output with page ranges
+            source_idx = 1
+            for filename, page_contents in doc_groups.items():
+                pages = [p for p, _ in page_contents]
+                
+                # Create page range string
+                if len(pages) == 1:
+                    page_info = f"Page {pages[0]}"
+                else:
+                    # Try to create a range if pages are numeric and consecutive
+                    try:
+                        numeric_pages = [int(p) for p in pages if str(p).isdigit()]
+                        if numeric_pages:
+                            numeric_pages.sort()
+                            page_info = f"Pages {min(numeric_pages)}-{max(numeric_pages)}"
+                        else:
+                            page_info = f"Pages {', '.join(map(str, pages))}"
+                    except:
+                        page_info = f"Pages {', '.join(map(str, pages))}"
+                
+                combined_response += f"[Source {source_idx}]\n"
+                combined_response += f"Document: {filename}\n"
+                combined_response += f"{page_info}\n"
+                
+                # Include all content from this document
+                for idx, (page, content) in enumerate(page_contents, 1):
+                    if len(page_contents) > 1:
+                        combined_response += f"  [Page {page}]: {content}\n"
+                    else:
+                        combined_response += f"Content: {content}\n"
+                
+                combined_response += "\n"
+                source_idx += 1
+            
             return combined_response
         except Exception as e:
             return f"RAG search error: {e}"

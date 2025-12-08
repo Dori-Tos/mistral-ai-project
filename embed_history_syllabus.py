@@ -20,7 +20,7 @@ def embed_history_syllabus():
     print("✓ Client initialized successfully\n")
     
     # Path to the complete syllabus
-    pdf_path = "History_syllabus/Cambridge_20_century.pdf"
+    pdf_path = "History_syllabus/Cambridge_History_Option_B_the_20_th_century.pdf"
     
     if not os.path.exists(pdf_path):
         print(f"❌ Error: {pdf_path} not found.")
@@ -94,9 +94,14 @@ def embed_history_syllabus():
             results = client.search_similar(query, k=3)
             print(f"  Found {len(results)} relevant chunks")
             if results:
-                # Show first result snippet
-                snippet = results[0].page_content[:150].replace('\n', ' ')
-                print(f"  Top result: {snippet}...")
+                # Show first result with metadata
+                first_result = results[0]
+                snippet = first_result.page_content[:150].replace('\n', ' ')
+                metadata = first_result.metadata if hasattr(first_result, 'metadata') else {}
+                page = metadata.get('page', 'N/A')
+                filename = metadata.get('filename', 'N/A')
+                print(f"  Top result from '{filename}', Page {page}:")
+                print(f"    {snippet}...")
         
         print("\n" + "="*60)
         print("🎉 Syllabus embedding complete!")
@@ -150,9 +155,12 @@ def test_fact_checking():
             print(f"Found {len(results)} relevant passages:\n")
             for i, doc in enumerate(results[:3], 1):
                 content = doc.page_content.strip().replace('\n', ' ')[:200]
+                metadata = doc.metadata if hasattr(doc, 'metadata') else {}
+                page = metadata.get('page', 'N/A')
+                filename = metadata.get('filename', 'N/A')
+                
                 print(f"{i}. {content}...")
-                if hasattr(doc, 'metadata') and 'page' in doc.metadata:
-                    print(f"   [Page {doc.metadata['page']}]")
+                print(f"   [Source: {filename}, Page {page}]")
         else:
             print("No relevant information found.")
 
