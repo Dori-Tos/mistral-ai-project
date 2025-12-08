@@ -21,7 +21,7 @@ class AITools:
     
         
     @staticmethod
-    def search_wikipedia_sections(query: str) -> str:
+    def get_wikipedia_sections(query: str) -> str:
         """Search Wikipedia and return section titles for a topic.
         Args:
             query: The search query or topic to look up on Wikipedia.

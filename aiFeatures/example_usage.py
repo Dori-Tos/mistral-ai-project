@@ -100,7 +100,7 @@ def test_wikipedia_sections():
     for query in queries:
         print(f"\nTesting: '{query}'")
         print("-" * 40)
-        result = AITools.search_wikipedia_sections(query)
+        result = AITools.get_wikipedia_sections(query)
         print(result)
         
 def test_wikipedia_section_pick():
