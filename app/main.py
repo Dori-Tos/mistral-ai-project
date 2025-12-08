@@ -7,10 +7,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from aiFeatures.MistralClient import *
 from utils.file_processor import *
+from utils.image_processor import *
+from aiFeatures.Image_Identifier import Image_Identifier
 
 app = Flask(__name__)
 
 ai_client = get_ai_client()
+image_identifier = Image_Identifier()
 
 class AppState:
     def __init__(self):
@@ -37,7 +40,11 @@ def home():
 
 @app.route("/import")
 def import_page():
-    return render_template('import.html')
+    return render_template('import_text.html')
+
+@app.route("/import-image")
+def import_image_page():
+    return render_template('import_image.html')
 
 @app.route("/events")
 def events_page():
@@ -128,7 +135,7 @@ def analyze_text():
                     text_error = f"AI processing failed: {str(ai_error)}"
                     print(f"=== END DEBUG - ERROR ===")
                     # If AI fails, still redirect to import page with error message
-                    return render_template('import.html', text_error=text_error)
+                    return render_template('import_text.html', text_error=text_error)
             
     except Exception as e:
         text_error = f"An error occurred while processing your text: {str(e)}"
@@ -150,19 +157,19 @@ def analyze_pdf():
         # Check if file was uploaded
         if 'document_file' not in request.files:
             file_error = "No file was selected. Please choose a file to upload."
-            return render_template('import.html', file_error=file_error)
+            return render_template('import_text.html', file_error=file_error)
         
         file = request.files['document_file']
         
         # Check if file was actually selected
         if file.filename == '':
             file_error = "No file was selected. Please choose a file to upload."
-            return render_template('import.html', file_error=file_error)
+            return render_template('import_text.html', file_error=file_error)
         
         # Validate file type
         if not allowed_file(file.filename):
             file_error = f"Invalid file type. Please upload files with extensions: {', '.join(ALLOWED_EXTENSIONS)}"
-            return render_template('import.html', file_error=file_error)
+            return render_template('import_text.html', file_error=file_error)
         
         # Check file size (Flask doesn't automatically enforce this)
         file.seek(0, 2)  # Seek to end of file
@@ -171,11 +178,11 @@ def analyze_pdf():
         
         if file_size > MAX_FILE_SIZE:
             file_error = f"File is too large ({format_file_size(file_size)}). Maximum size allowed is {format_file_size(MAX_FILE_SIZE)}."
-            return render_template('import.html', file_error=file_error)
+            return render_template('import_text.html', file_error=file_error)
         
         if file_size == 0:
             file_error = "The uploaded file is empty. Please choose a valid file."
-            return render_template('import.html', file_error=file_error)
+            return render_template('import_text.html', file_error=file_error)
         
         filepath = save_pdf_file(file)
         
@@ -210,6 +217,77 @@ def analyze_pdf():
     
     return render_template('index.html', 
                          file_error=file_error, 
+                         file_success=file_success)
+    
+@app.route("/analyze-image", methods=['POST'])
+def analyze_image():
+    """Handle image analysis requests using the AI Image Identifier."""
+    file_error = None
+    file_success = None
+    
+    clear_temporary_uploads()
+    
+    try:
+        # Check if file was uploaded
+        if 'image_file' not in request.files:
+            file_error = "No file was selected. Please choose an image to upload."
+            return render_template('import_image.html', file_error=file_error)
+        
+        file = request.files['image_file']
+        
+        # Check if file was actually selected
+        if file.filename == '':
+            file_error = "No file was selected. Please choose an image to upload."
+            return render_template('import_image.html', file_error=file_error)
+        
+        # Validate file type
+        if not allowed_image_file(file.filename):
+            file_error = f"Invalid file type. Please upload images with extensions: {', '.join(ALLOWED_EXTENSIONS)}"
+            return render_template('import_image.html', file_error=file_error)
+        
+        # Check file size
+        file.seek(0, 2)  # Seek to end of file
+        file_size = file.tell()
+        file.seek(0)  # Reset to beginning
+        
+        if file_size > MAX_FILE_SIZE:
+            file_error = f"File is too large ({format_file_size(file_size)}). Maximum size allowed is {format_file_size(MAX_FILE_SIZE)}."
+            return render_template('import_image.html', file_error=file_error)
+        
+        if file_size == 0:
+            file_error = "The uploaded file is empty. Please choose a valid image file."
+            return render_template('import_image.html', file_error=file_error)
+        
+        # Save the image file
+        filepath = save_image_file(file)
+        print(f"Image saved to: {filepath}")
+        
+        # Analyze the image using the AI Image Identifier
+        result = image_identifier.predict(filepath)
+        
+        # Prepare data for the results page
+        image_data = {
+            'filename': file.filename,
+            'size': format_file_size(file_size),
+            'prediction': result['prediction'],
+            'score': result['score'],
+            'confidence': result['confidence'],
+            'filepath': filepath
+        }
+        
+        print(f"Analysis complete: {result['prediction']} ({result['confidence']:.2f}% confidence)")
+        
+        # Redirect to results page
+        return render_template('image_identification.html', image_data=image_data)
+        
+    except Exception as e:
+        file_error = f"An error occurred while processing your image: {str(e)}"
+        print(f"Error in analyze_image: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+    return render_template('import_image.html',
+                           file_error=file_error, 
                          file_success=file_success)
 
 @app.errorhandler(413)

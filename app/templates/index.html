@@ -126,16 +126,16 @@
           <!-- Center Divider -->
           <div class="center-divider"></div>
 
-          <!-- Right Side - AI Image Detection -->
+          <!-- Right Side - AI Image Identifier -->
           <div class="tool-section right-tool">
             <div class="tool-header">
-              <h2>AI Image Detector</h2>
+              <h2>AI Image Identifier</h2>
               <p class="tool-subtitle">Powered by Advanced AI</p>
             </div>
             
             <div class="tool-description">
               <p>
-                Detect whether images are AI-generated or authentic using our
+                Identify whether images are AI-generated or authentic using our
                 cutting-edge detection algorithms. Perfect for journalists,
                 researchers, and anyone concerned about image authenticity.
               </p>
@@ -146,7 +146,7 @@
                 <div class="feature-icon">🖼️</div>
                 <h3>Image Upload</h3>
                 <p>
-                  Upload images in various formats including JPG, PNG, and WEBP
+                  Upload images in various formats including JPG, JPEG and PNG
                   for analysis.
                 </p>
               </div>
@@ -177,8 +177,8 @@
             </div>
             
             <div class="tool-cta">
-              <a href="#" class="cta-button cta-button-secondary">
-                Try AI Image Detector
+              <a href="{{ url_for('import_image_page') }}" class="cta-button">
+                Try AI Image Identifier
               </a>
             </div>
             

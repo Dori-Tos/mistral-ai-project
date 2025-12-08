@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Analysis Result - AI Generated Image Identifier</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <h1>AI Image Identifier</h1>
+          <p class="subtitle">Analysis Results</p>
+        </div>
+        <nav class="navigation">
+          <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+          <a href="{{ url_for('import_image_page') }}" class="nav-link">Analyze Image</a>
+        </nav>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="result-container">
+          <div class="result-header">
+            <h1 class="result-title">Analysis Complete</h1>
+            <p class="result-subtitle">Your image has been analyzed using our AI model</p>
+          </div>
+
+          <!-- Image Preview -->
+          <div class="image-preview">
+            <img 
+              src="{{ url_for('static', filename='../uploads/' + image_data.filepath.split('/')[-1]) }}" 
+              alt="Uploaded image" 
+              class="preview-img"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            />
+            <div style="display:none; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+              <p>📷 Image Preview Unavailable</p>
+              <p style="font-size: 0.9rem; color: #6c757d;">Filename: {{ image_data.filename }}</p>
+            </div>
+          </div>
+
+          <!-- Image Information -->
+          <div class="image-info">
+            <div class="info-row">
+              <span class="info-label">📁 Filename:</span>
+              <span class="info-value">{{ image_data.filename }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">📊 File Size:</span>
+              <span class="info-value">{{ image_data.size }}</span>
+            </div>
+          </div>
+
+          <!-- Prediction Result -->
+          <div class="prediction-result {% if image_data.prediction == 'Real' %}real{% else %}ai-generated{% endif %}">
+            <div class="prediction-label">Classification Result</div>
+            <div class="prediction-value">
+              {% if image_data.prediction == 'Real' %}
+                ✅ Real Image
+              {% else %}
+                🤖 AI Generated
+              {% endif %}
+            </div>
+            
+            <div class="confidence-bar-container">
+              <div class="confidence-bar" style="width: {{ image_data.confidence }}%;">
+                {{ "%.1f"|format(image_data.confidence) }}%
+              </div>
+            </div>
+            <div class="confidence-text">
+              Confidence: {{ "%.2f"|format(image_data.confidence) }}%
+            </div>
+          </div>
+
+          <!-- Score Details -->
+          <div class="score-details">
+            <h3>📈 Technical Details</h3>
+            <div class="score-info">
+              <strong>Raw Score:</strong> {{ "%.4f"|format(image_data.score) }}
+            </div>
+            <div class="score-info">
+              <strong>Interpretation:</strong> 
+              {% if image_data.score <= 0.5 %}
+                The model's analysis indicates this image exhibits characteristics typical of real, non-AI-generated images. 
+                Score values closer to 0 suggest stronger confidence in authenticity.
+              {% else %}
+                The model's analysis indicates this image exhibits characteristics typical of AI-generated content.
+                Score values closer to 1 suggest stronger confidence in AI generation.
+              {% endif %}
+            </div>
+            <div class="score-info" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
+              <em>Note: This model has been trained on historical images to distinguish between real and AI-generated content. 
+              Results are probabilistic and should be considered as guidance rather than absolute certainty.</em>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <a href="{{ url_for('home') }}" class="btn btn-primary">
+              🏠 Back to Home
+            </a>
+            <a href="{{ url_for('import_image_page') }}" class="btn btn-secondary">
+              📤 Analyze Another Image
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Animate confidence bar on page load
+      window.addEventListener('load', function() {
+        const bar = document.querySelector('.confidence-bar');
+        if (bar) {
+          const width = bar.style.width;
+          bar.style.width = '0%';
+          setTimeout(() => {
+            bar.style.width = width;
+          }, 100);
+        }
+      });
+    </script>
+  </body>
+</html>
