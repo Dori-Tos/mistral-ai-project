@@ -9,7 +9,10 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, PydanticOutputParser
 from langchain_mistralai import ChatMistralAI
 from pydantic import BaseModel, Field
-from aiFeatures.AITools import get_fact_analysis_tools
+try:
+    from AITools import get_fact_analysis_tools
+except ImportError:
+    from aiFeatures.AITools import get_fact_analysis_tools
 
 class MistralClient:
     """Singleton service for Mistral AI interactions"""

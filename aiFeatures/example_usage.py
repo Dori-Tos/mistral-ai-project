@@ -79,13 +79,52 @@ def example_structured_outputs():
     print(f"Summary: {review.summary}")
     print(f"Pros: {', '.join(review.pros)}")
     print(f"Cons: {', '.join(review.cons)}")
+    
+
+        
+def test_wikipedia_sections():
+    """
+    Test the Wikipedia sections tool.
+    """
+    print("\n" + "="*60)
+    print("Wikipedia Sections Test")
+    print("="*60)
+    
+    queries = [
+        "Bill Gates",
+        "World War II",
+        "Artificial Intelligence",
+        "Climate Change"
+    ]
+    
+    for query in queries:
+        print(f"\nTesting: '{query}'")
+        print("-" * 40)
+        result = AITools.search_wikipedia_sections(query)
+        print(result)
+        
+def test_wikipedia_section_pick():
+    """
+    Test the Wikipedia sections tool.
+    """
+    print("\n" + "="*60)
+    print("Wikipedia Section Pick Test")
+    print("="*60)
+    
+    queries = ["Bill Gates"]
+    sections = ["Early life and education", "IBM partnership", "Philanthropy"]
+    
+    for section in sections:
+        print(f"\nTesting: '{section}'")
+        print("-" * 40)
+        result = AITools.get_wikipedia_section_content(queries[0], section)
+        print(result)
 
 
 if __name__ == "__main__":
     # Run all examples
     try:
-        example_tools()
-        example_structured_outputs()
+        test_wikipedia_section_pick()
         
         print("\n" + "=" * 60)
         print("All examples completed successfully!")

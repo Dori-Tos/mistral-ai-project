@@ -1,8 +1,12 @@
 
 from datetime import datetime
 import wikipedia
+import wikipediaapi
 import requests
-import aiFeatures.EmbeddingClient
+try:
+    import EmbeddingClient
+except ImportError:
+    import aiFeatures.EmbeddingClient as EmbeddingClient
 
 
 class AITools:
@@ -36,6 +40,83 @@ class AITools:
             return f"Multiple results found. Please be more specific. Options: {options}"
         except wikipedia.exceptions.PageError:
             return f"No Wikipedia page found for '{query}'"
+        except Exception as e:
+            return f"Wikipedia search error: {e}"
+        
+    @staticmethod
+    def search_wikipedia_sections(query: str) -> str:
+        """Search Wikipedia and return section titles for a topic.
+        Args:
+            query: The search query or topic to look up on Wikipedia.
+        Returns:
+            Section titles of the Wikipedia article or error message.
+        """
+        try:
+            # Use wikipediaapi for better section support
+            wiki_wiki = wikipediaapi.Wikipedia(
+                user_agent='HistoricalFactChecker/1.0',
+                language='en'
+            )
+            
+            # Get the page
+            page = wiki_wiki.page(query)
+            
+            if not page.exists():
+                return f"No Wikipedia page found for '{query}'"
+            
+            # Extract section titles recursively
+            def get_sections(sections, level=0):
+                section_list = []
+                for section in sections:
+                    indent = "  " * level
+                    section_list.append(f"{indent}- {section.title}")
+                    # Get subsections recursively
+                    if section.sections:
+                        section_list.extend(get_sections(section.sections, level + 1))
+                return section_list
+            
+            sections = get_sections(page.sections)
+            
+            if not sections:
+                # Return summary if no sections
+                summary = page.summary[:500]
+                return f"Page found but no sections available.\n\nSummary:\n{summary}..."
+            
+            return f"Article: {page.title}\n\nSections:\n" + "\n".join(sections)
+            
+        except Exception as e:
+            return f"Wikipedia search error: {e}"
+        
+    @staticmethod
+    def get_wikipedia_section_content(query: str, section_title: str) -> str:
+        """Get content of a specific section from a Wikipedia article.
+        Args:
+            query: The search query or topic to look up on Wikipedia.
+            section_title: The title of the section to retrieve content from.
+        Returns:
+            Content of the specified section or an error message.
+        """
+        try:
+            # Use wikipediaapi for better section support
+            wiki_wiki = wikipediaapi.Wikipedia(
+                user_agent='HistoricalFactChecker/1.0',
+                language='en'
+            )
+            
+            # Get the page
+            page = wiki_wiki.page(query)
+            
+            if not page.exists():
+                return f"No Wikipedia page found for '{query}'"
+            
+            section = page.section_by_title(section_title)
+            if not section:
+                # Return summary if no sections
+                summary = page.summary[:500]
+                return f"Page found but no sections available.\n\nSummary:\n{summary}..."
+            
+            return f"Article: {page.title}\nSection: {section.title}\n" + section.text
+            
         except Exception as e:
             return f"Wikipedia search error: {e}"
         
@@ -80,7 +161,7 @@ class AITools:
         """
         try:
             # Try to use the singleton client first (if it has data loaded)
-            client = aiFeatures.EmbeddingClient.get_embedding_client()
+            client = EmbeddingClient.get_embedding_client()
             
             # If the client's vector store is empty, try to load from disk
             if client.vector_store is None:
