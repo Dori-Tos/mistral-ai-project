@@ -65,12 +65,14 @@ class AITools:
         
     @staticmethod
     def get_wikipedia_sections(query: str) -> str:
-        """Search Wikipedia and return section titles for a topic.
+        """Search Wikipedia and return section titles for a wikipedia page.
         Args:
-            query: The search query or topic to look up on Wikipedia.
+            query: The wikipedia Page title.
         Returns:
             Section titles of the Wikipedia article or error message.
+            Returned format: section 1, section 2, subsection 2.1, etc.
         """
+        print("called get_wikipedia_sections with query:", query)  # Debug log
         try:
             # Use wikipediaapi for better section support
             wiki_wiki = wikipediaapi.Wikipedia(
@@ -126,11 +128,12 @@ class AITools:
     def get_wikipedia_section_content(query: str, section_title: str) -> str:
         """Get content of a specific section from a Wikipedia article.
         Args:
-            query: The search query or topic to look up on Wikipedia.
+            query: The wikipedia Page title.
             section_title: The title of the section to retrieve content from.
         Returns:
             Content of the specified section or an error message.
         """
+        print("called get_wikipedia_section_content with query:", query, "and section_title:", section_title)
         try:
             # Use wikipediaapi for better section support
             wiki_wiki = wikipediaapi.Wikipedia(
@@ -142,12 +145,14 @@ class AITools:
             page = wiki_wiki.page(query)
             
             if not page.exists():
+                print(f"Debug: Wiki Page '{query}' does not exist.")
                 return f"No Wikipedia page found for '{query}'"
             
             section = page.section_by_title(section_title)
             if not section:
                 # Return summary if no sections
                 summary = page.summary[:500]
+                print(f"page found but no section {section_title}")
                 return f"Page found but no sections available.\n\nSummary:\n{summary}..."
             
             return f"Article: {page.title}\nSection: {section.title}\n" + section.text
@@ -172,6 +177,15 @@ class AITools:
             # If the client's vector store is empty, try to load from disk
             if client.vector_store is None:
                 import os
+                
+                # Convert relative path to absolute path based on project root
+                if not os.path.isabs(vector_store_path):
+                    # Get the project root (parent of aiFeatures directory)
+                    current_file = os.path.abspath(__file__)
+                    aifeatures_dir = os.path.dirname(current_file)
+                    project_root = os.path.dirname(aifeatures_dir)
+                    vector_store_path = os.path.join(project_root, vector_store_path)
+                
                 if os.path.exists(vector_store_path):
                     client.load_vector_store(vector_store_path)
                 else:
@@ -251,9 +265,9 @@ def get_all_tools():
 def get_fact_analysis_tools():
     """Returns a list of fact-checking and RAG tool functions"""
     return [
-        #AITools.search_wikipedia,
-        #AITools.search_ninja_api,
         AITools.search_rag,
+        AITools.get_wikipedia_sections,
+        AITools.get_wikipedia_section_content
     ]
     
     

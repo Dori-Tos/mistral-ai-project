@@ -36,7 +36,7 @@ class MistralClient:
         if not self.api_key:
             raise ValueError("MISTRAL_API_KEY is not set")
         
-        self.model_name = os.getenv("MISTRAL_MODEL", "mistral-medium-latest")
+        self.model_name = os.getenv("MISTRAL_MODEL", "mistral-large-latest")
         self.temperature = float(os.getenv("MISTRAL_TEMPERATURE", "0.0"))
         self.client = Mistral(api_key=self.api_key)
         self.llm = ChatMistralAI(api_key=self.api_key, model_name=self.model_name, temperature=self.temperature)  # type: ignore
@@ -76,10 +76,10 @@ class MistralClient:
         chain = prompt | self.llm | self.parser
         return chain.invoke(variables)
 
-    def run_with_tools(self, instruction: str, tools: List[Callable] = []) -> str:
+    def run_with_tools(self, instruction: str, tools: List[Callable] = [], max_iterations: int = 10) -> str:
         """
         Execute instruction with optional tool access.
-        If tools provided, AI can call them. Otherwise, direct response.
+        If tools provided, AI can call them multiple times. Otherwise, direct response.
         """
         if not tools:
             # No tools - use simple chain
@@ -89,57 +89,53 @@ class MistralClient:
         tool_specs = [self.build_tool_spec(f) for f in tools]
         messages: List[Union[UserMessage, AssistantMessage, ToolMessage]] = [UserMessage(role="user", content=instruction)]
         
-        # Initial request with tools
-        response = self.client.chat.complete(
-            model=self.model_name,
-            messages=messages,  # type: ignore
-            tools=tool_specs,  # type: ignore
-            temperature=self.temperature
-        )
-        
-        msg = response.choices[0].message
-        tool_calls = msg.tool_calls or []
-        
-        # No tools called - return direct answer
-        if not tool_calls:
-            content = msg.content
-            if isinstance(content, list):
-                return " ".join(str(chunk) for chunk in content)
-            return content or ""
-        
-        # Execute tool calls
-        messages.append(msg)
-        for tc in tool_calls:
-            # Arguments might already be a dict or a JSON string
-            args = tc.function.arguments if isinstance(tc.function.arguments, dict) else json.loads(tc.function.arguments)
-            fn = next((f for f in tools if f.__name__ == tc.function.name), None)
+        # Allow multiple rounds of tool calls
+        for iteration in range(max_iterations):
+            # Request with tools
+            response = self.client.chat.complete(
+                model=self.model_name,
+                messages=messages,  # type: ignore
+                tools=tool_specs,  # type: ignore
+                temperature=self.temperature
+            )
             
-            if fn is None:
-                result = f"Error: function {tc.function.name} not implemented"
-            else:
-                try:
-                    result = fn(**args)
-                except Exception as e:
-                    result = f"Error executing {tc.function.name}: {e}"
+            msg = response.choices[0].message
+            tool_calls = msg.tool_calls or []
             
-            print(f"Tool {tc.function.name}({args}) -> {str(result)[:160]}")
-            messages.append(ToolMessage(
-                role="tool",
-                content=str(result),
-                name=tc.function.name,
-                tool_call_id=tc.id
-            ))
+            # No more tools to call - return final answer
+            if not tool_calls:
+                content = msg.content
+                if isinstance(content, list):
+                    return " ".join(str(chunk) for chunk in content)
+                return content or ""
+            
+            # Execute tool calls in this iteration
+            messages.append(msg)
+            for tc in tool_calls:
+                # Arguments might already be a dict or a JSON string
+                args = tc.function.arguments if isinstance(tc.function.arguments, dict) else json.loads(tc.function.arguments)
+                fn = next((f for f in tools if f.__name__ == tc.function.name), None)
+                
+                if fn is None:
+                    result = f"Error: function {tc.function.name} not implemented"
+                else:
+                    try:
+                        result = fn(**args)
+                    except Exception as e:
+                        result = f"Error executing {tc.function.name}: {e}"
+                
+                print(f"Tool {tc.function.name}({args}) -> {str(result)[:160]}")
+                messages.append(ToolMessage(
+                    role="tool",
+                    content=str(result),
+                    name=tc.function.name,
+                    tool_call_id=tc.id
+                ))
+            
+            # Continue loop to allow more tool calls
         
-        # Final response after tool execution
-        final = self.client.chat.complete(
-            model=self.model_name,
-            messages=messages,  # type: ignore
-            temperature=self.temperature
-        )
-        content = final.choices[0].message.content
-        if isinstance(content, list):
-            return " ".join(str(chunk) for chunk in content)
-        return content or ""
+        # Max iterations reached - return last response
+        return "Max tool iterations reached"
     
     def get_structured_output(self, prompt: str, schema: Type[BaseModel]) -> BaseModel:
         """Get a structured output using a Pydantic model schema."""
@@ -222,7 +218,7 @@ class MistralClient:
         return response
     
     def analyze_event(self, event_description: str, date: str = "", author: str = "") -> str:
-        """Analyze a historical event description"""
+        """Analyze a historical event description using a two-step approach"""
         
         author_info = f"Author of the submitted text: {author}" if author else ""
         date_info = f"Date when the text was written: {date}" if date else ""
@@ -230,58 +226,91 @@ class MistralClient:
         complementary_info = "- \n".join(filter(None, [author_info, date_info]))
         print(f"Important complementary info :\n{complementary_info}")
         
-        prompt = f"""Provide a detailed analysis of the following historical event description.
+        # STEP 1: Retrieve relevant information from sources
+        print("\n=== STEP 1: Retrieving source information ===")
+        retrieval_prompt = f"""TASK: Find source information to verify this claim: "{event_description}"
 
-            MANDATORY FIRST STEP - CALL THE SEARCH TOOL:
-            Before providing any analysis, you MUST call the search_rag tool with a query about the event.
-            
-            Example: If analyzing "Hitler's drug use", call: search_rag(query="Hitler drug use methamphetamine")
-            
-            For the current event description, extract key terms and call search_rag to retrieve information from authorized documents.
-            The search_rag tool will return document excerpts with their filenames and page numbers.
-            
-            CRITICAL CITATION RULES:
-            The search_rag tool returns sources in this format:
-            [Source 1]
-            Document: filename.pdf
-            Pages X-Y
-            Content: ...
-            
-            When citing sources in your analysis:
-            - ONLY use the EXACT document filenames returned by search_rag (e.g., "Cambridge_History_Option_B_the_20_th_century.pdf")
-            - ONLY use the EXACT page numbers returned by search_rag (e.g., "Pages 15-17" or "Page 23")
-            - DO NOT make up, invent, or guess any document names or page numbers
-            - If search_rag returns no results, state "No sources found" and give score 0
-            - Format citations exactly as: [filename.pdf, Pages X-Y]
-            
-            AFTER calling search_rag and receiving the results:
-            - Evaluate the accuracy of the event description using the retrieved documents
-            - Cite using ONLY the exact filenames and pages from search_rag results
-            - Identify any biases or perspectives present in the description
-            - Contextualize the event within its historical period
-            
-            Return the analysis as a JSON object with this exact structure:
-            {{
-                "accuracy": string,          # Assessment with citations using EXACT filenames and pages from search_rag
-                "biases": string,            # Identified biases with citations
-                "contextualization": string, # Historical context with citations
-                "references": [string],      # List of sources cited (format: "filename.pdf, Pages X-Y" - ONLY from search_rag results)
-                "score": int                 # 0-3: 3=identical to sources, 2=verified externally, 1=verified with discrepancies, 0=not verified
-            }}
+        STEP-BY-STEP INSTRUCTIONS (execute each step):
 
-            Important instructions:
-            - ALWAYS call search_rag first, using keywords from the event description
-            - ONLY cite documents and pages that were returned by search_rag
-            - Never invent, create, or fabricate document names or page numbers
-            - Base your analysis ONLY on information from search_rag results
-            - Return raw JSON only (no markdown, no code blocks, no extra text)
-            - Ensure valid JSON (no trailing commas)
-            
-            Here are some additional details about the submitted text:
-            {complementary_info}
+        STEP 1: Call search_rag
+        - Execute: search_rag(query="relevant keywords from claim")
+        - Example: search_rag(query="R2-D2 Star Wars Episode I Phantom Menace appearance")
 
-            Here is the event description to analyze: {event_description}"""
-        response = self.run_with_tools(prompt,get_fact_analysis_tools())
+        STEP 2: Evaluate RAG results
+        - Look at what search_rag returned
+        - Does it contain relevant information about the claim topic?
+        - If YES and relevant → Return the RAG content exactly as given
+        - If NO or irrelevant (wrong topic, wrong document) → Continue to STEP 3
+
+        STEP 3: Use Wikipedia (ONLY if RAG failed or was irrelevant)
+        Execute these tool calls:
+        a) get_wikipedia_sections(query="Star Wars Episode I The Phantom Menace")
+        - This shows you what sections exist
+        - Read the section titles
+        
+        b) get_wikipedia_section_content(query="Star Wars Episode I The Phantom Menace", section_title="Plot")
+        - OR pick another relevant section like "Cast" or "Characters"
+        - Get the actual content
+        
+        c) Try other topics if first doesn't exist:
+        - get_wikipedia_sections(query="R2-D2")
+        - get_wikipedia_section_content(query="R2-D2", section_title="Appearances")
+
+        RETURN FORMAT:
+        - Copy and paste the EXACT tool output
+        - Do NOT add commentary like "No relevant information found"
+        - Do NOT say "Proceeding to Step 3"
+        - Just return the actual source text from the tools
+        - If ALL tools fail, then and only then say: "No sources found"
+
+        NOW EXECUTE THE STEPS ABOVE."""
+        
+        sources = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools())
+        print(f"Sources retrieved:\n{sources}\n")
+        
+        # Check if we actually got sources
+        if not sources or "No relevant information found" in sources or len(sources.strip()) < 50:
+            print("⚠️ WARNING: No sources were retrieved! Analysis may be unreliable.")
+        
+        # STEP 2: Analyze using the retrieved information
+        print("=== STEP 2: Analyzing claim with retrieved sources ===")
+        analysis_prompt = f"""You are a fact-checker analyzing a claim using ONLY provided source documents.
+
+        SOURCES PROVIDED TO YOU:
+        ---START OF SOURCES---
+        {sources}
+        ---END OF SOURCES---
+
+        CLAIM TO VERIFY: "{event_description}"
+
+        Additional context: {complementary_info}
+
+        STRICT RULES - READ CAREFULLY:
+        1. You MUST ONLY use information from the sources between the START and END markers above
+        2. You CANNOT use your training data, prior knowledge, or general knowledge
+        3. If the sources don't contain information about the claim, you MUST say "Cannot verify - no relevant information in sources"
+        4. DO NOT say things like "though not explicitly provided" or "according to general knowledge"
+        5. If you cite something, it MUST be a direct quote or paraphrase from the sources above
+        6. If the sources are empty or say "No relevant information found", give score 0 and state this clearly
+
+        Analyze the claim and return a JSON object with this structure:
+        {{
+            "accuracy": string,          # What do the PROVIDED SOURCES say? Quote them directly. If sources are empty, say "No sources available to verify"
+            "biases": string,            # Any biases in the claim presentation (based on sources only)
+            "contextualization": string, # Context from the PROVIDED SOURCES only. If no context available, say so.
+            "references": [string],      # List EXACT sources from the text above (document names, page numbers, or Wikipedia sections)
+            "score": int                 # 0=no sources or contradicted, 1=partial info, 2=mostly verified, 3=fully verified from sources
+        }}
+
+        Return ONLY valid JSON (no markdown, no ```json, no extra text, no trailing commas)."""
+        
+        response = self.run_with_tools(analysis_prompt, [])  # No tools needed for step 2
+        print(f"\n=== FINAL RESPONSE FROM analyze_event ===")
+        print(f"Response type: {type(response)}")
+        print(f"Response length: {len(response) if response else 0}")
+        print(f"First 200 chars: {response[:200] if response else 'EMPTY'}")
+        print(f"Last 200 chars: {response[-200:] if response and len(response) > 200 else response}")
+        print("=" * 50)
         return response
 
         
