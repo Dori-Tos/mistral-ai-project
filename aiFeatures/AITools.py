@@ -155,35 +155,6 @@ class AITools:
         except Exception as e:
             return f"Wikipedia search error: {e}"
         
-    @staticmethod
-    def search_ninja_api(ninja_api_key: str, query: str, year=None, month=None, day=None) -> str:
-        """Search a list of historical events associated with the query, can be more focused by using the date, this API is hosted on ninja API.
-        Args:
-            ninja_api_key: API key for the Ninja API.
-            query: Specific topic to search for.
-            year (optional): Year of the date to search for (can be negative to represent BC).
-            month (optional): Month of the date to search for.
-            day (optional): Day of the date to search for.
-        Returns:
-            List of the events, their summaries and dates.
-        """
-        
-        params = {
-            "text": query,
-            "year": year,
-            "month": month,
-            "day": day,
-        }
-        
-        response = requests.get(
-            "https://api.api-ninjas.com/v1/historicalevents",
-            headers={
-                "X-Api-Key": ninja_api_key,
-            },
-            params=params,
-        ).text
-        
-        return response
     
     @staticmethod
     def search_rag(query: str, vector_store_path: str = "RAG_vector_store") -> str:
