@@ -11,6 +11,13 @@ body {
     color: #333;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html {
+    overflow: hidden;
+    height: 100vh;
 }
 
 .container {
@@ -25,22 +32,26 @@ body {
 /* Header Styles */
 .header {
     text-align: center;
-    padding: 40px 0;
+    padding: 12px 0;
     border-bottom: 2px solid #f0f0f0;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .logo h1 {
-    font-size: 2.5em;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 10px;
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 2px;
+    display: inline;
 }
 
 .subtitle {
-    font-size: 1.1em;
-    color: #7f8c8d;
-    font-weight: 400;
+    font-size: 0.85em;
+    color: #ffffff;
+    font-weight: 300;
+    display: inline;
+    margin-left: 10px;
 }
 
 /* Main Content */
@@ -110,76 +121,122 @@ body {
 
 /* Input Section */
 .input-section {
-    margin-bottom: 60px;
-    padding: 40px 0;
+    margin-bottom: 0;
+    padding: 15px 20px;
     background: #f8f9fa;
     border-radius: 15px;
-    padding: 40px 30px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .input-section h2 {
-    font-size: 2em;
+    font-size: 1.4em;
     color: #2c3e50;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     text-align: center;
+}
+
+.input-section h3 {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 5px;
+    text-align: center;
+    font-weight: 400;
 }
 
 .section-description {
     text-align: center;
     color: #666;
-    margin-bottom: 40px;
-    font-size: 1.1em;
+    margin-bottom: 10px;
+    font-size: 0.9em;
 }
 
 .input-methods {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 40px;
+    gap: 15px;
+    flex: 1;
+    overflow: hidden;
 }
 
 .input-method {
     background: white;
-    padding: 30px;
+    padding: 15px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .input-method h3 {
-    font-size: 1.4em;
+    font-size: 1.1em;
     color: #2c3e50;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-weight: 600;
+}
+
+.text-form,
+.file-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    justify-content: space-between;
 }
 
 /* Form Styles */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+}
+
+.text-form > .form-group,
+.file-form > .file-upload-area,
+.file-form > .document-info {
+    flex: 0 0 auto;
+}
+
+.text-form .form-group:has(textarea),
+.file-form .document-info {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.text-form .form-group:has(textarea) textarea {
+    flex: 1;
+    height: auto;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-weight: 500;
     color: #555;
+    font-size: 0.9em;
 }
 
 textarea {
     width: 100%;
-    padding: 15px;
+    padding: 8px;
     border: 2px solid #e1e5e9;
     border-radius: 8px;
     font-family: inherit;
-    font-size: 14px;
-    resize: vertical;
+    font-size: 13px;
+    resize: none;
     transition: border-color 0.3s ease;
 }
 
 /* Large textarea for maximum text input space */
 .large-textarea {
-    min-height: 400px;
-    max-height: 600px;
-    line-height: 1.6;
-    font-size: 15px;
+    height: 100%;
+    min-height: 100px;
+    line-height: 1.4;
+    font-size: 13px;
+    flex: 1;
 }
 
 textarea:focus {
@@ -190,10 +247,12 @@ textarea:focus {
 
 /* Document Information Section */
 .document-info {
-    margin-top: 25px;
-    padding: 20px;
+    margin-top: 8px;
+    padding: 8px;
     background: #f8f9fa;
-    border-radius: 10px;
+    border-radius: 8px;
+    overflow-y: auto;
+    flex: 1;
     border: 1px solid #e9ecef;
 }
 
@@ -209,11 +268,11 @@ textarea:focus {
 input[type="text"], 
 input[type="date"] {
     width: 100%;
-    padding: 12px 15px;
+    padding: 6px 10px;
     border: 2px solid #e1e5e9;
     border-radius: 8px;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     transition: border-color 0.3s ease;
     background: white;
 }
@@ -245,8 +304,8 @@ input[type="date"]:invalid {
 /* File Upload Styles */
 .file-upload-area {
     border: 2px dashed #c1c9d0;
-    border-radius: 12px;
-    padding: 40px;
+    border-radius: 8px;
+    padding: 10px;
     text-align: center;
     transition: all 0.3s ease;
     background: #fafbfc;
@@ -254,7 +313,7 @@ input[type="date"]:invalid {
 }
 
 .file-upload-area.compact {
-    padding: 25px 20px;
+    padding: 8px 12px;
 }
 
 .file-upload-area.compact .upload-icon {
@@ -290,24 +349,27 @@ input[type="date"]:invalid {
 
 .file-browse-btn {
     display: inline-block;
-    background: #667eea;
-    color: white;
-    padding: 12px 24px;
+    background: transparent;
+    color: #667eea;
+    padding: 6px 12px;
+    border: 1px solid #667eea;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    transition: background-color 0.3s ease;
-    margin: 15px 0;
+    transition: all 0.3s ease;
+    margin: 5px 0;
+    font-size: 0.85em;
 }
 
 .file-browse-btn:hover {
-    background: #5a67d8;
+    background: #667eea;
+    color: white;
 }
 
 .file-info {
-    font-size: 0.9em;
+    font-size: 0.75em;
     color: #777;
-    margin-top: 10px;
+    margin-top: 3px;
 }
 
 .file-preview {
@@ -398,18 +460,19 @@ input[type="date"]:invalid {
     background: #667eea;
     color: white;
     border: none;
-    padding: 15px 30px;
+    padding: 8px 20px;
     border-radius: 8px;
-    font-size: 1.1em;
+    font-size: 0.95em;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 10px;
+    flex-shrink: 0;
 }
 
 .submit-btn:hover {

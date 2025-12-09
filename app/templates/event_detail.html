@@ -94,7 +94,19 @@
               <div class="status-item published">
                 <h3>References</h3>
                 <div class="status-description">
-                  {{event.references}}
+                  {% if event.references %}
+                    {% if event.references is string %}
+                      {{ event.references }}
+                    {% else %}
+                      <ul>
+                        {% for ref in event.references %}
+                          <li>{{ ref }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  {% else %}
+                    No references available
+                  {% endif %}
                 </div>
               </div>
             </div>

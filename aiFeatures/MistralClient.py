@@ -298,7 +298,7 @@ class MistralClient:
             "accuracy": string,          # What do the PROVIDED SOURCES say? Quote them directly. If sources are empty, say "No sources available to verify"
             "biases": string,            # Any biases in the claim presentation (based on sources only)
             "contextualization": string, # Context from the PROVIDED SOURCES only. If no context available, say so.
-            "references": [string],      # List EXACT sources from the text above (document names, page numbers, or Wikipedia sections)
+            "references": [string],      # Extract ONLY the actual source citations from the SOURCES text above. Look for patterns like "Document: [filename]" followed by "Page X" or "Pages X-Y", or "Article: [name]" followed by "Section: [section name]". Format as: "[Document/Article name] - Page(s) X" or "[Article name] - Section: [section]". DO NOT include RAG query strings or tool call syntax.
             "score": int                 # 0=no sources or contradicted, 1=partial info, 2=mostly verified, 3=fully verified from sources
         }}
 
