@@ -6,9 +6,9 @@ import json
 import inspect
 from typing import Optional, List, Dict, Any, Callable, Type, Union
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser, PydanticOutputParser
+from langchain_core.output_parsers import StrOutputParser, PydanticOutputParser
 from langchain_mistralai import ChatMistralAI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 try:
     from AITools import get_fact_analysis_tools
 except ImportError:
@@ -36,7 +36,7 @@ class MistralClient:
         if not self.api_key:
             raise ValueError("MISTRAL_API_KEY is not set")
         
-        self.model_name = os.getenv("MISTRAL_MODEL", "mistral-large-latest")
+        self.model_name = os.getenv("MISTRAL_MODEL", "mistral-medium-latest")
         self.temperature = float(os.getenv("MISTRAL_TEMPERATURE", "0.0"))
         self.client = Mistral(api_key=self.api_key)
         self.llm = ChatMistralAI(api_key=self.api_key, model_name=self.model_name, temperature=self.temperature)  # type: ignore
@@ -243,18 +243,34 @@ class MistralClient:
         - If NO or irrelevant (wrong topic, wrong document) → Continue to STEP 3
 
         STEP 3: Use Wikipedia (ONLY if RAG failed or was irrelevant)
-        Execute these tool calls:
-        a) get_wikipedia_sections(query="Star Wars Episode I The Phantom Menace")
-        - This shows you what sections exist
-        - Read the section titles
+        **CRITICAL WORKFLOW - Follow this exact sequence:**
         
-        b) get_wikipedia_section_content(query="Star Wars Episode I The Phantom Menace", section_title="Plot")
-        - OR pick another relevant section like "Cast" or "Characters"
-        - Get the actual content
+        For each Wikipedia page you want to check:
         
-        c) Try other topics if first doesn't exist:
-        - get_wikipedia_sections(query="R2-D2")
-        - get_wikipedia_section_content(query="R2-D2", section_title="Appearances")
+        1. FIRST: Call get_wikipedia_sections to see what sections exist
+           - get_wikipedia_sections(query="exact page title")
+           - **If response says "Try another Wikipedia page" → SKIP this page, try a different title**
+           - **If response says "No Wikipedia page found" → Try a different title**
+           - **If response lists sections → Remember these section names exactly as shown**
+        
+        2. SECOND: Call get_wikipedia_section_content using the EXACT section name from step 1
+           - get_wikipedia_section_content(query="same page title", section_title="exact section name from list")
+           - **You MUST use a section name that was in the list from step 1**
+           - **Do NOT guess section names like "Political career" or "Presidential campaigns"**
+           - **Use the actual section names shown: "History", "Fifth Republic", "See also", etc.**
+        
+        3. If a page has issues or no relevant sections:
+           - Try a completely different Wikipedia page title
+           - Start over at step 1 with the new title
+        
+        Example correct workflow:
+        → get_wikipedia_sections(query="Marine Le Pen")
+        ← Returns: "Sections: - Early life - Political positions - Electoral history"
+        → get_wikipedia_section_content(query="Marine Le Pen", section_title="Electoral history")
+        ← Returns actual content
+        
+        Example WRONG workflow:
+        → get_wikipedia_section_content(query="Marine Le Pen", section_title="Presidential campaigns")  ❌ NEVER do this without checking sections first!
 
         RETURN FORMAT:
         - Copy and paste the EXACT tool output
@@ -265,7 +281,7 @@ class MistralClient:
 
         NOW EXECUTE THE STEPS ABOVE."""
         
-        sources = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools())
+        sources = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools(), max_iterations=15)
         print(f"Sources retrieved:\n{sources}\n")
         
         # Check if we actually got sources

@@ -97,9 +97,8 @@ class AITools:
                 for cat in page.categories.keys()
             )
             
-            reliability_note = ""
             if has_issues:
-                reliability_note = "\n⚠️ WARNING: This article has citation/sourcing issues and may not be reliable.\n"
+                return f"Wikipedia page '{query}' has reliability/citation issues. Try another Wikipedia page with a different title related to your query."
             
             # Extract section titles recursively
             def get_sections(sections, level=0):
@@ -117,9 +116,9 @@ class AITools:
             if not sections:
                 # Return summary if no sections
                 summary = page.summary[:500]
-                return f"Article: {page.title}{reliability_note}\nPage found but no sections available.\n\nSummary:\n{summary}..."
+                return f"Article: {page.title}\nPage found but no sections available.\n\nSummary:\n{summary}..."
             
-            return f"Article: {page.title}{reliability_note}\nSections:\n" + "\n".join(sections)
+            return f"Article: {page.title}\nSections:\n" + "\n".join(sections)
             
         except Exception as e:
             return f"Wikipedia search error: {e}"
