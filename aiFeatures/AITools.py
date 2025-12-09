@@ -271,7 +271,8 @@ def get_fact_analysis_tools():
     ]
     
     
-# Test functions
-tool = AITools()
-print("Current Time:", tool.get_current_time())
-print("RAG Search Result:", tool.search_rag("Harrison Ford claim about gary moore"))
+# Test functions - only run when this file is executed directly
+if __name__ == "__main__":
+    tool = AITools()
+    print("Current Time:", tool.get_current_time())
+    print("RAG Search Result:", tool.search_rag("Harrison Ford claim about gary moore"))
