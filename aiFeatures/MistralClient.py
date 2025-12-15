@@ -158,20 +158,6 @@ class MistralClient:
         
         # Max iterations reached - return last response
         return ("Max tool iterations reached", response)
-    
-    def get_structured_output(self, prompt: str, schema: Type[BaseModel]) -> BaseModel:
-        """Get a structured output using a Pydantic model schema."""
-        parser = PydanticOutputParser(pydantic_object=schema)
-        format_instructions = parser.get_format_instructions()
-        
-        full_prompt = PromptTemplate(
-            template="{prompt}\n\n{format_instructions}",
-            input_variables=["prompt"],
-            partial_variables={"format_instructions": format_instructions}
-        )
-        
-        chain = full_prompt | self.llm | parser
-        return chain.invoke({"prompt": prompt})
 
     def list_event_facts(self, text: str, author: str = "", date: str = "", comment: str = "") -> str:
         """Extract factual statements & historical events from text"""
