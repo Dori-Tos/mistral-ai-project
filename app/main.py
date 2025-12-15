@@ -59,7 +59,7 @@ def event_detail(event_id):
     
     try:
         # Get AI analysis of the event
-        analysis_response = ai_client.analyze_event(event.get('resume'), event.get("date"), event.get("author"))
+        analysis_response, impacts = ai_client.analyze_event(event.get('resume'), event.get("date"), event.get("author"))
         
         # Clean and parse the JSON response
         cleaned_analysis = clean_json_response(analysis_response)
@@ -110,7 +110,7 @@ def analyze_text():
                     # Save input text
                     save_input_text(historical_text)
                     
-                    raw_response = ai_client.list_event_facts(historical_text)
+                    raw_response, impacts = ai_client.list_event_facts(historical_text)
                     
                     # Clean the JSON response
                     cleaned_json = clean_json_response(raw_response)
@@ -191,7 +191,7 @@ def analyze_pdf():
         print(text_content)
         
         # 2. Call Mistral AI API with the extracted text
-        raw_response = ai_client.list_event_facts(text_content, author=author, date=date, comment=comment)
+        raw_response, impacts = ai_client.list_event_facts(text_content, author=author, date=date, comment=comment)
                     
         # Clean the JSON response
         cleaned_json = clean_json_response(raw_response)

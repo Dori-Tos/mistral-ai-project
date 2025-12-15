@@ -220,7 +220,7 @@ class MistralClient:
         print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
         print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
         print(f"==========================\n")
-        return text_result
+        return text_result, impacts
     
     def analyze_event(self, event_description: str, date: str = "", author: str = "") -> str:
         """Analyze a historical event description using a two-step approach"""
@@ -323,18 +323,38 @@ class MistralClient:
         Return ONLY the raw JSON object. Start with {{ and end with }}. No other text."""
         
         text_result, analysis_response = self.run_with_tools(analysis_prompt, [])  # No tools needed for step 2
-        print(f"\n=== Environmental Impact (Analysis) ===")
-        impacts = analysis_response.impacts
-        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
-        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
-        print(f"====================================\n")
+        analysis_impacts = analysis_response.impacts
+        
+        # Sum the impacts from both steps
+        retrieval_impacts = retrieval_response.impacts
+        total_gwp_min = retrieval_impacts.gwp.value.min + analysis_impacts.gwp.value.min
+        total_gwp_max = retrieval_impacts.gwp.value.max + analysis_impacts.gwp.value.max
+        total_wcf_min = retrieval_impacts.wcf.value.min + analysis_impacts.wcf.value.min
+        total_wcf_max = retrieval_impacts.wcf.value.max + analysis_impacts.wcf.value.max
+        
+
         print(f"\n=== FINAL RESPONSE FROM analyze_event ===")
         print(f"Response type: {type(text_result)}")
         print(f"Response length: {len(text_result) if text_result else 0}")
         print(f"First 200 chars: {text_result[:200] if text_result else 'EMPTY'}")
         print(f"Last 200 chars: {text_result[-200:] if text_result and len(text_result) > 200 else text_result}")
         print("=" * 50)
-        return text_result
+        
+        # Create a combined impacts object to return (using dict for simplicity)
+        combined_impacts = {
+            'gwp': {
+                'min': total_gwp_min,
+                'max': total_gwp_max,
+                'unit': retrieval_impacts.gwp.unit
+            },
+            'wcf': {
+                'min': total_wcf_min,
+                'max': total_wcf_max,
+                'unit': retrieval_impacts.wcf.unit
+            }
+        }
+        
+        return text_result, combined_impacts
 
         
 # Singleton instance getter
