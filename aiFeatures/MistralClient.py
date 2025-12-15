@@ -13,6 +13,8 @@ try:
     from AITools import get_fact_analysis_tools
 except ImportError:
     from aiFeatures.AITools import get_fact_analysis_tools
+    
+from ecologits import EcoLogits
 
 class MistralClient:
     """Singleton service for Mistral AI interactions"""
@@ -42,6 +44,7 @@ class MistralClient:
         self.llm = ChatMistralAI(api_key=self.api_key, model_name=self.model_name, temperature=self.temperature)  # type: ignore
         self.parser = StrOutputParser()
         self._initialized = True
+        EcoLogits.init(providers=["mistralai"])
     
     @staticmethod
     def build_tool_spec(func: Callable) -> Dict[str, Any]:
@@ -70,20 +73,39 @@ class MistralClient:
             }
         }
         
-    def run_chain(self, template: str, variables: dict) -> str:
-        """Run a simple LangChain prompt template with variables."""
+    def run_chain(self, template: str, variables: dict) -> tuple[str, Any]:
+        """Run a simple LangChain prompt template with variables.
+        Returns: (text_content, response_object_with_impacts)
+        Note: LangChain doesn't provide direct access to response object, so we make a direct API call instead.
+        """
         prompt = PromptTemplate.from_template(template)
-        chain = prompt | self.llm | self.parser
-        return chain.invoke(variables)
+        formatted_prompt = prompt.format(**variables)
+        response = self.client.chat.complete(
+            model=self.model_name,
+            messages=[{"role": "user", "content": formatted_prompt}],
+            temperature=self.temperature
+        )
+        content = response.choices[0].message.content or ""
+        return (content, response)
 
-    def run_with_tools(self, instruction: str, tools: List[Callable] = [], max_iterations: int = 10) -> str:
+    def run_with_tools(self, instruction: str, tools: List[Callable] = [], max_iterations: int = 10) -> tuple[str, Any]:
         """
         Execute instruction with optional tool access.
         If tools provided, AI can call them multiple times. Otherwise, direct response.
+        Returns: (text_content, response_object_with_impacts)
         """
         if not tools:
-            # No tools - use simple chain
-            return self.run_chain("{instruction}", {"instruction": instruction})
+            # No tools - use simple chain with direct API call to get impacts
+            response = self.client.chat.complete(
+                model=self.model_name,
+                messages=[{"role": "user", "content": instruction}],
+                temperature=self.temperature
+            )
+            msg = response.choices[0].message
+            content = msg.content
+            if isinstance(content, list):
+                return (" ".join(str(chunk) for chunk in content), response)
+            return (content or "", response)
         
         # Build tool specs
         tool_specs = [self.build_tool_spec(f) for f in tools]
@@ -106,8 +128,8 @@ class MistralClient:
             if not tool_calls:
                 content = msg.content
                 if isinstance(content, list):
-                    return " ".join(str(chunk) for chunk in content)
-                return content or ""
+                    return (" ".join(str(chunk) for chunk in content), response)
+                return (content or "", response)
             
             # Execute tool calls in this iteration
             messages.append(msg)
@@ -135,7 +157,7 @@ class MistralClient:
             # Continue loop to allow more tool calls
         
         # Max iterations reached - return last response
-        return "Max tool iterations reached"
+        return ("Max tool iterations reached", response)
     
     def get_structured_output(self, prompt: str, schema: Type[BaseModel]) -> BaseModel:
         """Get a structured output using a Pydantic model schema."""
@@ -206,8 +228,13 @@ class MistralClient:
             {complementary_info}
 
             Here is the text to analyze: {text}"""
-        response = self.run_with_tools(prompt,[])
-        return response
+        text_result, response = self.run_with_tools(prompt,[])
+        print(f"\n=== Environmental Impact ===")
+        impacts = response.impacts
+        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
+        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
+        print(f"==========================\n")
+        return text_result
     
     def analyze_event(self, event_description: str, date: str = "", author: str = "") -> str:
         """Analyze a historical event description using a two-step approach"""
@@ -239,10 +266,25 @@ class MistralClient:
 
         IMPORTANT: When you have enough relevant information, STOP and return it. Do not keep searching indefinitely.
 
-        Return ONLY the actual source content, nothing else."""
+        CRITICAL OUTPUT FORMAT:
+        Return the raw source content EXACTLY as received from the tools with clear citation headers.
+        Format your response as:
+
+        === RAG SOURCES ===
+        [Include full RAG output if used, including Document name and Pages]
+
+        === WIKIPEDIA SOURCES ===
+        [Include full Wikipedia content with Article name and Section names]
+
+        DO NOT summarize, interpret, or analyze the content. Return it verbatim with clear source markers."""
         
-        sources = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools(), max_iterations=15)
+        sources, retrieval_response = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools(), max_iterations=15)
         print(f"Sources retrieved:\n{sources}\n")
+        print(f"\n=== Environmental Impact (Retrieval) ===")
+        impacts = retrieval_response.impacts
+        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
+        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
+        print(f"======================================\n")
         
         # Check if we actually got sources
         if not sources or "No relevant information found" in sources or len(sources.strip()) < 50:
@@ -274,7 +316,11 @@ class MistralClient:
             "accuracy": string,          # What do the PROVIDED SOURCES say? Quote them directly. If sources are empty, say "No sources available to verify"
             "biases": string,            # Any biases in the claim presentation (based on sources only)
             "contextualization": string, # Context from the PROVIDED SOURCES only. If no context available, say so.
-            "references": [string],      # Extract ONLY the actual source citations from the SOURCES text above. Look for patterns like "Document: [filename]" followed by "Page X" or "Pages X-Y", or "Article: [name]" followed by "Section: [section name]". Format as: "[Document/Article name] - Page(s) X" or "[Article name] - Section: [section]". DO NOT include RAG query strings or tool call syntax.
+            "references": [string],      # Extract ALL source citations from the SOURCES text above. Look for these patterns:
+                                         # - "Document: [filename]" with "Page X" or "Pages X-Y" → Format as: "[filename] - Pages X-Y"
+                                         # - "Article: [name]" with "Section: [section]" → Format as: "Wikipedia: [Article name] - Section: [section name]"
+                                         # Include ALL sources found in the SOURCES section. Each source should be a separate string in the array.
+                                         # Example: ["Cambridge_History_Option_B_the_20_th_century.pdf - Pages 26-804", "Wikipedia: François Fillon - Section: Prime minister", "Wikipedia: François Fillon - Section: Presidential bid"]
             "score": int                 # 0=no sources or contradicted, 1=partial info, 2=mostly verified, 3=fully verified from sources
         }}
 
@@ -290,14 +336,19 @@ class MistralClient:
 
         Return ONLY the raw JSON object. Start with {{ and end with }}. No other text."""
         
-        response = self.run_with_tools(analysis_prompt, [])  # No tools needed for step 2
+        text_result, analysis_response = self.run_with_tools(analysis_prompt, [])  # No tools needed for step 2
+        print(f"\n=== Environmental Impact (Analysis) ===")
+        impacts = analysis_response.impacts
+        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
+        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
+        print(f"====================================\n")
         print(f"\n=== FINAL RESPONSE FROM analyze_event ===")
-        print(f"Response type: {type(response)}")
-        print(f"Response length: {len(response) if response else 0}")
-        print(f"First 200 chars: {response[:200] if response else 'EMPTY'}")
-        print(f"Last 200 chars: {response[-200:] if response and len(response) > 200 else response}")
+        print(f"Response type: {type(text_result)}")
+        print(f"Response length: {len(text_result) if text_result else 0}")
+        print(f"First 200 chars: {text_result[:200] if text_result else 'EMPTY'}")
+        print(f"Last 200 chars: {text_result[-200:] if text_result and len(text_result) > 200 else text_result}")
         print("=" * 50)
-        return response
+        return text_result
 
         
 # Singleton instance getter
