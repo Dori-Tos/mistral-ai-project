@@ -38,12 +38,12 @@
           <!-- Image Preview -->
           <div class="image-preview">
             <img 
-              src="{{ url_for('static', filename='../uploads/' + image_data.filepath.split('/')[-1]) }}" 
+              src="{{ url_for('uploaded_file', filename=image_data.filepath.split('\\')[-1]) }}" 
               alt="Uploaded image" 
               class="preview-img"
               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
             />
-            <div style="display:none; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+            <div class="image-preview-fallback" style="display:none; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
               <p>📷 Image Preview Unavailable</p>
               <p style="font-size: 0.9rem; color: #6c757d;">Filename: {{ image_data.filename }}</p>
             </div>

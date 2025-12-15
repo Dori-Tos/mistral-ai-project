@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 import os
 import sys
 
@@ -11,6 +11,7 @@ from utils.image_processor import *
 from aiFeatures.Image_Identifier import Image_Identifier
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ai_client = get_ai_client()
 image_identifier = Image_Identifier()
@@ -45,6 +46,11 @@ def import_page():
 @app.route("/import-image")
 def import_image_page():
     return render_template('import_image.html')
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    """Serve uploaded files."""
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route("/events")
 def events_page():
