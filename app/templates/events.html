@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Loading Spinner Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p class="loading-text">Analyzing event...</p>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -61,5 +67,20 @@
             </div>
         </footer>
     </div>
+
+    <script>
+      // Show loading spinner when clicking on event cards
+      document.addEventListener('DOMContentLoaded', function() {
+        const eventCards = document.querySelectorAll('.event-card');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        eventCards.forEach(function(card) {
+          card.addEventListener('click', function() {
+            // Show the loading overlay
+            loadingOverlay.style.display = 'flex';
+          });
+        });
+      });
+    </script>
 </body>
 </html>

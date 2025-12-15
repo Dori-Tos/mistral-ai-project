@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="import-page">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,10 +13,17 @@
       rel="stylesheet"
     />
   </head>
-  <body>
+  <body class="import-page">
+    <!-- Loading Spinner Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <p class="loading-text">Analyzing your content...</p>
+    </div>
+
     <!-- Input Section -->
     <section class="input-section">
       <h2>Submit Your Document for Analysis</h2>
+      <h3>Precise author and date information help improve analysis accuracy.</h3>
       <p class="section-description">
         Choose your preferred method to submit historical content for
         fact-checking analysis.
@@ -72,9 +79,6 @@
           >
             <div class="file-upload-area compact">
               <div class="upload-content">
-                <label for="file-input" class="file-browse-btn">
-                  Browse from Computer
-                </label>
                 <input
                   type="file"
                   id="file-input"
@@ -131,5 +135,20 @@
         </div>
       </div>
     </section>
+
+    <script>
+      // Show loading spinner when forms are submitted
+      document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.text-form, .file-form');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        forms.forEach(function(form) {
+          form.addEventListener('submit', function(e) {
+            // Show the loading overlay
+            loadingOverlay.style.display = 'flex';
+          });
+        });
+      });
+    </script>
   </body>
 </html>

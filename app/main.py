@@ -57,6 +57,25 @@ def event_detail(event_id):
     if event is None:
         return render_template('events.html', events=all_events, error="Event not found")
     
+    try:
+        # Get AI analysis of the event
+        analysis_response = ai_client.analyze_event(event.get('resume'), event.get("date"), event.get("author"))
+        
+        # Clean and parse the JSON response
+        cleaned_analysis = clean_json_response(analysis_response)
+        analysis = parse_json_cleaned_json(cleaned_analysis)
+        
+        # If parsing was successful and we got a dict, add it to the event
+        if isinstance(analysis, dict):
+            event = add_event_details(event, analysis)
+            print(f"Analysis accuracy: {analysis.get('accuracy', 'N/A')}")
+        else:
+            print(f"Analysis response was not a dict: {type(analysis)}")
+            event = add_event_details(event, {})
+    except Exception as e:
+        print(f"Error analyzing event: {e}")
+        event = add_event_details(event, {})
+    
     return render_template('event_detail.html', event=event)
 
 @app.route("/analyze-text", methods=['POST'])

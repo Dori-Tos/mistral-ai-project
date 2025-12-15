@@ -73,25 +73,40 @@
             <h2>AI Analysis</h2>
             <div class="status-grid">
               <div class="status-item verified">
-                <h3>AI Score : {{ event.ai_score }}</h3>
+                <h3>AI Score : {{ event.score }}/3
+                  <span class="info-icon" title="0=no sources or contradicted&#10;1=partial info&#10;2=mostly verified&#10;3=fully verified from sources">ℹ️</span>
+                </h3>
+              </div>
+              <div class="status-item published">
+                <h3>Accuracy</h3>
+                <div class="status-description">{{event.accuracy}}</div>
+              </div>
+              <div class="status-item published">
+                <h3>Biases</h3>
+                <div class="status-description">{{event.biases}}</div>
+              </div>
+              <div class="status-item published">
+                <h3>Contextualization</h3>
                 <div class="status-description">
-                  -- Processed by Mistral AI --
+                  {{event.contextualization}}
                 </div>
               </div>
               <div class="status-item published">
-                <h3>References used</h3>
-                <div class="status-description">{{event.ai_reference}}</div>
-              </div>
-              <div class="status-item published">
-                <h3>Factual statement of the event</h3>
+                <h3>References</h3>
                 <div class="status-description">
-                  {{event.ai_factual_statement}}
-                </div>
-              </div>
-              <div class="status-item published">
-                <h3>Critical analysis</h3>
-                <div class="status-description">
-                  {{event.ai_critical_analysis}}
+                  {% if event.references %}
+                    {% if event.references is string %}
+                      {{ event.references }}
+                    {% else %}
+                      <ul>
+                        {% for ref in event.references %}
+                          <li>{{ ref }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  {% else %}
+                    No references available
+                  {% endif %}
                 </div>
               </div>
             </div>
