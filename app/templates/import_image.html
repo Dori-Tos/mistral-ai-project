@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historical AI Generated Image Identifier - Based on SanKolisetty Github Project</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <h1>AI Image Identifier</h1>
+          <p class="subtitle">Detect AI-Generated Images</p>
+        </div>
+        <nav class="navigation">
+          <a href="{{ url_for('home') }}" class="nav-link">Home</a>
+          <a href="{{ url_for('import_page') }}" class="nav-link">Import Document</a>
+        </nav>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Input Section -->
+        <section class="input-section">
+      <h2>Submit Your Image for Identification</h2>
+      <p class="section-description">
+        Your image will be categorized as AI generated or Real based on our model.
+      </p>
+
+        <!-- File Upload Method -->
+        <div class="input-method">
+          <h3>📁 File Upload</h3>
+          {% if file_error %}
+          <div class="error-message">{{ file_error }}</div>
+          {% endif %} {% if file_success %}
+          <div class="success-message">{{ file_success }}</div>
+          {% endif %}
+          <form
+            class="image-form"
+            action="/analyze-image"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <div class="file-upload-area compact">
+              <div class="upload-content">
+                <label for="image-input" class="file-browse-btn">
+                  Browse from Computer
+                </label>
+                <input
+                  type="file"
+                  id="image-input"
+                  name="image_file"
+                  accept=".jpg,.jpeg,.png"
+                  required
+                />
+                <p class="file-info">Supported formats: JPG, JPEG, PNG (Max 10MB)</p>
+              </div>
+            </div>
+                        
+            <button type="submit" class="submit-btn">
+              <span class="btn-icon">📊</span>
+              Analyze Image
+            </button>
+          </form>
+        </div>
+      </section>
+      </main>
+    </div>
+  </body>
+</html>
