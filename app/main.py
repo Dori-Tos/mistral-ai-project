@@ -303,4 +303,4 @@ def too_large(e):
                          file_error=f"File is too large. Maximum size allowed is {format_file_size(MAX_FILE_SIZE)}."), 413
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
