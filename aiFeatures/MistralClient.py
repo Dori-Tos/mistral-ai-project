@@ -167,7 +167,6 @@ class MistralClient:
         comment_info = f"Comment about the submitted text : {comment}" if comment else ""
         
         complementary_info = "- \n".join(filter(None, [author_info, date_info, comment_info]))
-        print(f"Important complementary info :\n{complementary_info}")
         
         prompt = f"""List all historical claims and statements from the following text.
 
@@ -215,12 +214,30 @@ class MistralClient:
 
             Here is the text to analyze: {text}"""
         text_result, response = self.run_with_tools(prompt,[])
-        print(f"\n=== Environmental Impact ===")
         impacts = response.impacts
-        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
-        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
-        print(f"==========================\n")
-        return text_result, impacts
+
+        
+        # Compute total tokens
+        usage = response.usage
+        total_input_tokens = usage.prompt_tokens if hasattr(usage, 'prompt_tokens') else 0
+        total_output_tokens = usage.completion_tokens if hasattr(usage, 'completion_tokens') else 0
+        
+        # Add tokens to impacts dictionary with extracted values
+        impacts_dict = {
+            'gwp': {
+                'min': impacts.gwp.value.min,
+                'max': impacts.gwp.value.max,
+                'unit': impacts.gwp.unit
+            },
+            'wcf': {
+                'min': impacts.wcf.value.min,
+                'max': impacts.wcf.value.max,
+                'unit': impacts.wcf.unit
+            },
+            'total_input_tokens': total_input_tokens,
+            'total_output_tokens': total_output_tokens
+        }
+        return text_result, impacts_dict
     
     def analyze_event(self, event_description: str, date: str = "", author: str = "") -> str:
         """Analyze a historical event description using a two-step approach"""
@@ -229,7 +246,6 @@ class MistralClient:
         date_info = f"Date when the text was written: {date}" if date else ""
         
         complementary_info = "- \n".join(filter(None, [author_info, date_info]))
-        print(f"Important complementary info :\n{complementary_info}")
         
         # STEP 1: Retrieve relevant information from sources
         print("\n=== STEP 1: Retrieving source information ===")
@@ -266,15 +282,6 @@ class MistralClient:
         
         sources, retrieval_response = self.run_with_tools(retrieval_prompt, get_fact_analysis_tools(), max_iterations=15)
         print(f"Sources retrieved:\n{sources}\n")
-        print(f"\n=== Environmental Impact (Retrieval) ===")
-        impacts = retrieval_response.impacts
-        print(f"GWP (Global Warming Potential): {impacts.gwp.value.min:.2e} - {impacts.gwp.value.max:.2e} {impacts.gwp.unit}")
-        print(f"WCF (Water Consumption Footprint): {impacts.wcf.value.min:.5f} - {impacts.wcf.value.max:.5f} {impacts.wcf.unit}")
-        print(f"======================================\n")
-        
-        # Check if we actually got sources
-        if not sources or "No relevant information found" in sources or len(sources.strip()) < 50:
-            print("⚠️ WARNING: No sources were retrieved! Analysis may be unreliable.")
         
         # STEP 2: Analyze using the retrieved information
         print("=== STEP 2: Analyzing claim with retrieved sources ===")
@@ -332,13 +339,17 @@ class MistralClient:
         total_wcf_min = retrieval_impacts.wcf.value.min + analysis_impacts.wcf.value.min
         total_wcf_max = retrieval_impacts.wcf.value.max + analysis_impacts.wcf.value.max
         
-
-        print(f"\n=== FINAL RESPONSE FROM analyze_event ===")
-        print(f"Response type: {type(text_result)}")
-        print(f"Response length: {len(text_result) if text_result else 0}")
-        print(f"First 200 chars: {text_result[:200] if text_result else 'EMPTY'}")
-        print(f"Last 200 chars: {text_result[-200:] if text_result and len(text_result) > 200 else text_result}")
-        print("=" * 50)
+        # Compute total tokens from both steps
+        retrieval_usage = retrieval_response.usage
+        analysis_usage = analysis_response.usage
+        
+        retrieval_input = retrieval_usage.prompt_tokens if hasattr(retrieval_usage, 'prompt_tokens') else 0
+        retrieval_output = retrieval_usage.completion_tokens if hasattr(retrieval_usage, 'completion_tokens') else 0
+        analysis_input = analysis_usage.prompt_tokens if hasattr(analysis_usage, 'prompt_tokens') else 0
+        analysis_output = analysis_usage.completion_tokens if hasattr(analysis_usage, 'completion_tokens') else 0
+        
+        total_input_tokens = retrieval_input + analysis_input
+        total_output_tokens = retrieval_output + analysis_output
         
         # Create a combined impacts object to return (using dict for simplicity)
         combined_impacts = {
@@ -351,7 +362,9 @@ class MistralClient:
                 'min': total_wcf_min,
                 'max': total_wcf_max,
                 'unit': retrieval_impacts.wcf.unit
-            }
+            },
+            'total_input_tokens': total_input_tokens,
+            'total_output_tokens': total_output_tokens
         }
         
         return text_result, combined_impacts
