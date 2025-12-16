@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  historic-fact-checker:
+    image: dsmaelen/historic-fact-checker:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: historic-fact-checker
+    ports:
+      - "5000:5000"
+    environment:
+      - MISTRAL_API_KEY=${MISTRAL_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      - ./data:/historic-fact-checker/data  # Persist data between container restarts
+    restart: unless-stopped
