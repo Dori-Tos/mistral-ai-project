@@ -1,0 +1,26 @@
+[
+    {
+        "text": "Harrison ford once claimed he was in love with gary moore, as I learned in the last novel of Francis Ford Coppola from 1987.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "In the last episod of star wars from 2019 we also learn that Princess Leia has 6 toes on each foot.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "The first firearm was invented in China in 455 BC, according to a claim made by Francis Ford Coppola in 1987.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "wikipedia"
+        ]
+    }
+]

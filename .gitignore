@@ -16,3 +16,5 @@
 
 test_embedding_client.py
 test_rag_system.py
+
+/benchmark_results_20251216_200818/

@@ -1,0 +1,148 @@
+[
+    {
+        "text": "Harrison ford once claimed he was in love with gary moore, as I learned in the last novel of Francis Ford Coppola from 1987.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "In the last episod of star wars from 2019 we also learn that Princess Leia has 6 toes on each foot.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "The first firearm was invented in China in 455 BC, according to a claim made by Francis Ford Coppola in 1987.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "Marine Le Pen has already been president of France according to CNN.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "François Fillon has never been president of France.",
+        "label": "true",
+        "score": 3,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "According to a lost 1924 diary attributed to Nikola Tesla, the Eiffel Tower was briefly used as a wireless device to communicate with dolphins during World War I.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "In a 1963 interview rediscovered in the late 1990s, Pablo Picasso allegedly stated that cubism was inspired by a single afternoon he spent assembling broken radios.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "A little-known 1937 encyclopaedia claimed that the Great Depression ended temporarily every Thursday due to a clerical error in global accounting.",
+        "label": "false",
+        "score": 0,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "In the last season of The Office, Erin Hannon finds her parents",
+        "label": "true",
+        "score": 3,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "In 1939 Chamberlain resigned as prime minister and Winston Churchill took over.",
+        "label": "false",
+        "score": 2,
+        "sources": [
+            "RAG"
+        ]
+    },
+    {
+        "text": "France signed a treaty of alliance with USSR in 1934 if Germany invaded USSR.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "RAG"
+        ]
+    },
+    {
+        "text": "Albert Einstein once stated that imagination is more important than knowledge, a remark widely attributed to him in interviews and essays from the early 20th century.",
+        "label": "true",
+        "score": 2,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "The Berlin Wall fell in 1989, an event that marked a major step toward the reunification of Germany and boosted the pink floyd album 'The Wall' to international fame.",
+        "label": "true",
+        "score": 2,
+        "sources": [
+            "RAG",
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "Nelson Mandela was released from prison in 1990 after spending 27 years incarcerated in South Africa.",
+        "label": "true",
+        "score": 3,
+        "sources": [
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "Under the Nazi regime, the Gestapo was the official secret police of Germany and was responsible for suppressing opposition",
+        "label": "true",
+        "score": 3,
+        "sources": [
+            "RAG"
+        ]
+    },
+    {
+        "text": "Agent Orange, a herbicide used during the Vietnam War, has been linked to serious health issues including odorous fartings.",
+        "label": "true",
+        "score": 2,
+        "sources": [
+            "RAG",
+            "wikipedia"
+        ]
+    },
+    {
+        "text": "The delegates at the Paris Peace Conference could consult each other very easily and conclude agreements.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "RAG"
+        ]
+    },
+    {
+        "text": "The movieso of the 1920's showed women living passionate romances and enjoying freedom and this depicted the reality.",
+        "label": "false",
+        "score": 1,
+        "sources": [
+            "RAG"
+        ]
+    }
+]
